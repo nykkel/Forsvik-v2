@@ -137,6 +137,18 @@ namespace forsvikapi.Controllers
         }
 
         [HttpPost]
+        [Route("filesize")]
+        public async Task<ActionResult<int>> FileSize(FilesRequest request)
+        {
+            var total = await Task.Factory.StartNew(() => request
+                .FileIds
+                .Select(id => Repository.GetFileSize(id))
+                .Sum());
+
+            return total * 1024;            
+        }
+
+        [HttpPost]
         [Route("resources")]
         public async Task<ActionResult<DownloadModel>> Resources(FilesRequest request)
         {
@@ -145,7 +157,7 @@ namespace forsvikapi.Controllers
             if (request.FileIds.Count == 1)
             {
                 var file = await Repository.GetFile(request.FileIds.First());
-                HttpContext.Response.Headers.Add("content-length", file.Data.Length.ToString());
+                HttpContext.Response.Headers.Add("File-Length", file.Data.Length.ToString());
 
                 return new DownloadModel
                 {

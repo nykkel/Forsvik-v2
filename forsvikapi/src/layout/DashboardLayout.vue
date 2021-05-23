@@ -24,7 +24,7 @@
   background-color: #444;
   text-align: center;
   color: white;
-  font-size:14px;  
+  font-size: 14px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s;
@@ -47,7 +47,9 @@
 
       <div class="row" style="padding: 20px">
         <div class="col-md-4">
-          <span class="h3 text-white text-uppercase">Forsviks-Guidens Arkiv</span>
+          <span class="h3 text-white text-uppercase"
+            >Forsviks-Guidens Arkiv</span
+          >
         </div>
         <div class="col-md-8 text-right">
           <router-link to="/dashboard" class="link">Hem</router-link>
@@ -91,10 +93,9 @@
       </div>
     </div>
     <router-view></router-view>
-    <div :class="{'loadingvisible': isBusy}" class="centered loading">
+    <div :class="{ loadingvisible: isBusy }" class="centered loading">
       <span>Arbetar. Var god vänta...</span>
     </div>
-
   </div>
 </template>
 <script>

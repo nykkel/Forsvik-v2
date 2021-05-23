@@ -21,11 +21,7 @@
         onclick="value = null"
         @change="addFiles"
       />
-      <button
-        type="button"
-        @click="downloadSelectedFiles"
-        class="btn-forsvik mr-2"
-      >
+      <button type="button" @click="downloadSelectedFiles" class="btn-forsvik mr-2">
         Ladda ner
       </button>
       <button
@@ -61,10 +57,7 @@
         class="mss"
       >
         <td>
-          <label
-            class="checkdiv"
-            style="vertical-align: top; margin-top: -12px"
-          >
+          <label class="checkdiv" style="vertical-align: top; margin-top: -12px">
             <input type="checkbox" v-model="file.isSelected" />
             <span class="checkmark"></span>
           </label>
@@ -115,14 +108,8 @@
       </template>
       <h4>Vill du ta bort {{ selectedFileCount }} markerade filer?</h4>
       <template v-slot:footer>
-        <base-button type="secondary" @click="hideDeleteModal"
-          >Stäng</base-button
-        >
-        <button
-          type="button"
-          class="btn btn-default"
-          @click="deleteSelectedFiles"
-        >
+        <base-button type="secondary" @click="hideDeleteModal">Stäng</base-button>
+        <button type="button" class="btn btn-default" @click="deleteSelectedFiles">
           Ta bort
         </button>
       </template>
@@ -144,9 +131,8 @@
 
     <div id="pictureModal" class="modal">
       <span class="close-modal" @click="closeModal">&times;</span>
-      
+
       <img id="modalImg" class="modal-content1" />
-      
     </div>
   </div>
 </template>
@@ -162,7 +148,7 @@ export default {
   name: "file-view",
   components: {
     EditLabel,
-    CircleProgress
+    CircleProgress,
   },
   props: {
     folderId: String,
@@ -180,22 +166,23 @@ export default {
   },
   data() {
     return {
-      files: [],      
+      files: [],
       showDelete: false,
       copyText: null,
       showQuickDownload: false,
       selectedFile: null,
       percentCompleted: 0,
-      showProgress: false
+      showProgress: false,
+      fileLength: 1,
     };
   },
   watch: {
     reload() {
       this.loadFiles();
     },
-    percentCompleted(x){
-      console.log(x);      
-    }
+    percentCompleted(x) {
+      console.log(x);
+    },
   },
   methods: {
     fileUrlToClipboard(file) {
@@ -226,7 +213,7 @@ export default {
       this.showQuickDownload = false;
       this.selectedFile.isSelected = true;
       this.files = [this.selectedFile];
-      this.downloadSelectedFiles();      
+      this.downloadSelectedFiles();
     },
     gotoFolder(folderId) {
       this.$router.push({ name: "folder", query: { id: folderId } });
@@ -236,7 +223,7 @@ export default {
       modal.style.display = "none";
     },
     showDeleteModal() {
-      if (this.files.find(f => f.isSelected)) {
+      if (this.files.find((f) => f.isSelected)) {
         this.showDelete = true;
       } else {
         alert("Du har inte markerat några filer!");
@@ -245,7 +232,7 @@ export default {
     hideDeleteModal() {
       this.showDelete = false;
     },
-    saveNameChanges(item) {      
+    saveNameChanges(item) {
       let file = this.files.find((f) => f.id === item.id);
       file.name = item.text;
       this.saveFileChanges(file);
@@ -285,34 +272,45 @@ export default {
       });
     },
     downloadSelectedFiles() {
-      this.showProgress = true;   
+      this.showProgress = true;
 
       var files = this.files.filter((f) => {
         return f.isSelected;
       });
       if (files.length === 0) {
-        this.showProgress = false;   
-        alert("Du har inte markerat några filer!");        
+        this.showProgress = false;
+        alert("Du har inte markerat några filer!");
         return;
       }
       const body = {
         fileIds: files.map((file) => file.id),
       };
+
       var callback = this.updateCompleted;
-      axios.post("/api/file/resources", body, {
-        onDownloadProgress: function(progressEvent) {          
-            let completed = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            console.log(completed);
-            callback(completed);
-          }
-        }).then((response) => {
-        this.showProgress = false;
-        this.saveFile(response);        
-      });
+      axios
+        .post("api/file/filesize", body)
+          .then(response => {
+              this.fileLength = response.data;
+              axios
+               .post("/api/file/resources", body, {
+                onDownloadProgress: function (progressEvent) {
+                  let completed = Math.round(
+                    (progressEvent.loaded * 100) / this.fileLength
+                  );
+                  console.log(completed);
+                  callback(completed);
+                },
+              })              
+              .then((response) => {
+                this.showProgress = false;
+                this.saveFile(response);
+              });
+
+            })
     },
     saveFile(response) {
       this.showBusy();
-      var data = response.data ? response.data : response.data.data;
+      var data = response.data.data;
       var blob = this.b64toBlob(data, "", 1024);
       var link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
@@ -327,11 +325,7 @@ export default {
       var byteCharacters = atob(b64Data);
       var byteArrays = [];
 
-      for (
-        var offset = 0;
-        offset < byteCharacters.length;
-        offset += sliceSize
-      ) {
+      for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
         var slice = byteCharacters.slice(offset, offset + sliceSize);
 
         var byteNumbers = new Array(slice.length);
@@ -376,7 +370,7 @@ export default {
       this.percentCompleted = c;
     },
     uploadData(files) {
-      this.showProgress = true;      
+      this.showProgress = true;
       var formData = new FormData();
       for (var i = 0; i < files.length; i++) {
         let file = files[i];
@@ -386,16 +380,25 @@ export default {
       axios
         .put("/api/file/uploadfiles", formData, {
           headers: {
-            'folderId': `${this.folderId}`,
-            'Content-Type': 'multipart/form-data'
+            folderId: `${this.folderId}`,
+            "Content-Type": "multipart/form-data",
           },
-          onUploadProgress: function(progressEvent) {
-            let completed = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onUploadProgress: function (progressEvent) {
+            let completed = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
             callback(completed);
-          }
+          },
         })
-        .catch(err => {
-          alert("ERR " + err.response + ", status: " + err.response.status + ", data: " + err.response.data);
+        .catch((err) => {
+          alert(
+            "ERR " +
+              err.response +
+              ", status: " +
+              err.response.status +
+              ", data: " +
+              err.response.data
+          );
           this.showProgress = false;
         })
         .then(() => {
@@ -415,12 +418,12 @@ export default {
   color: whitesmoke;
 }
 .centerprogress {
-            width:200px;
-            height:200px;
-            position: fixed;            
-            top: 50%;
-            left: 50%;
-            margin-top: -100px;
-            margin-left: -100px;
-        }
+  width: 200px;
+  height: 200px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -100px;
+  margin-left: -100px;
+}
 </style>

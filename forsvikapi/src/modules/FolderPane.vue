@@ -24,7 +24,13 @@
           </p>
         </div>
         <div class="col">
-          <img :src="thumbnailFromId(folder.imageFileId)" class="ghost-town" height="70" width="100" v-if="folder.imageFileId" />
+          <img
+            :src="thumbnailFromId(folder.imageFileId)"
+            class="ghost-town"
+            height="70"
+            width="100"
+            v-if="folder.imageFileId"
+          />
         </div>
       </div>
     </div>

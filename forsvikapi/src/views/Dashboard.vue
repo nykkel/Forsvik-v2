@@ -75,7 +75,7 @@ export default {
   },
   methods: {
     openArchive(id) {
-      this.$router.push({ name: "folder", query: { id: id } });      
+      this.$router.push({ name: "folder", query: { id: id } });
     },
     imgFromId(id) {
       let x = "/api/file/resource/" + id;

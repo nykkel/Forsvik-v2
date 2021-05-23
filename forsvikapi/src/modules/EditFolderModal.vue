@@ -74,18 +74,37 @@
             <td>
               <base-button
                 v-if="folder.id && folder.id !== null"
-                type="secondary"          
+                type="secondary"
                 style="margin-right: 20px"
-                @click="removeFolder">Ta bort</base-button>
+                @click="removeFolder"
+                >Ta bort</base-button
+              >
             </td>
             <td>
-              <input type="text" class="form-control mr-5" placeholder="Pos" v-model="folder.index" style="width:50px" />
+              <input
+                type="text"
+                class="form-control mr-5"
+                placeholder="Pos"
+                v-model="folder.index"
+                style="width: 50px"
+              />
             </td>
             <td>
-              <base-button type="secondary" style="margin-right:10px" @click="close">Stäng</base-button>
+              <base-button
+                type="secondary"
+                style="margin-right: 10px"
+                @click="close"
+                >Stäng</base-button
+              >
             </td>
             <td>
-              <button type="button" class="btn btn-default" v-on:click="saveFolder">Spara</button>
+              <button
+                type="button"
+                class="btn btn-default"
+                v-on:click="saveFolder"
+              >
+                Spara
+              </button>
             </td>
           </tr>
         </table>
@@ -99,8 +118,12 @@
         Vill du ta bort katalogen och alla underliggade filer och kataloger?
       </h4>
       <template v-slot:footer>
-        <base-button type="secondary" @click="showDelete = false">Stäng</base-button>
-        <button type="button" class="btn btn-default" @click="doRemoveFolder">Ta bort</button>
+        <base-button type="secondary" @click="showDelete = false"
+          >Stäng</base-button
+        >
+        <button type="button" class="btn btn-default" @click="doRemoveFolder">
+          Ta bort
+        </button>
       </template>
     </modal>
   </div>
@@ -134,12 +157,12 @@ export default {
   data() {
     return {
       show: false,
-      folder: {        
+      folder: {
         name: null,
         description: null,
         imageFileId: null,
         parentFolderId: null,
-        index: 1
+        index: 1,
       },
       showDelete: false,
       logo: "img/brand/archives-icon.jpg",
@@ -174,12 +197,12 @@ export default {
     },
     doRemoveFolder() {
       this.$emit("deleteFolder", this.folder.id);
-      this.showDelete = false;  
-      this.close();    
+      this.showDelete = false;
+      this.close();
     },
     clear() {
-      this.folder.name = null;   
-      this.folder.id = undefined;   
+      this.folder.name = null;
+      this.folder.id = undefined;
       this.folder.description = null;
       this.folder.imageFileId = null;
       this.folder.index = 1;
@@ -208,24 +231,34 @@ export default {
     uploadData(file) {
       var formdata = new FormData();
 
-      formdata.append("file", file, file.name);      
+      formdata.append("file", file, file.name);
 
-      axios.post("/api/file/uploadfile", formdata, {
-          headers: {            
-            'Content-Type': 'multipart/form-data'
+      axios
+        .post("/api/file/uploadfile", formdata, {
+          headers: {
+            "Content-Type": "multipart/form-data",
           },
         })
-        .catch(err => {
-          alert("ERR " + err.response + ", status: " + err.response.status + ", data: " + err.response.data);
+        .catch((err) => {
+          alert(
+            "ERR " +
+              err.response +
+              ", status: " +
+              err.response.status +
+              ", data: " +
+              err.response.data
+          );
         })
         .then((r) => {
-          this.folder.imageFileId = r.data.result;          
+          this.folder.imageFileId = r.data.result;
           let url = "/api/file/resource/" + r.data.result;
 
           const img = document.getElementById("logoimg");
-          img.addEventListener("load", () => URL.revokeObjectURL(this.imageUrl));
+          img.addEventListener("load", () =>
+            URL.revokeObjectURL(this.imageUrl)
+          );
           document.getElementById("logoimg").src = url;
-      });
+        });
     },
   },
 };

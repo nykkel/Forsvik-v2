@@ -7,18 +7,22 @@
             <tr>
               <td>
                 <input
-                    type="text"
-                    v-model="searchText"
-                    placeholder="Sök"
-                    class="search-text"
-                    style="box-shadow: none"
-                    v-on:keyup.enter="doSearch"
-                    v-on:keydown.enter.capture.prevent.stop
-                  />
+                  type="text"
+                  v-model="searchText"
+                  placeholder="Sök"
+                  class="search-text"
+                  style="box-shadow: none"
+                  v-on:keyup.enter="doSearch"
+                  v-on:keydown.enter.capture.prevent.stop
+                />
               </td>
               <td>
-                <div class="text-right" v-on:click="doSearch" style="cursor: pointer;color:#aaa">
-                  <i class="fas fa-search"></i>  
+                <div
+                  class="text-right"
+                  v-on:click="doSearch"
+                  style="cursor: pointer; color: #aaa"
+                >
+                  <i class="fas fa-search"></i>
                 </div>
               </td>
             </tr>

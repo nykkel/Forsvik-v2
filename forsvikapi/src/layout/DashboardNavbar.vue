@@ -18,15 +18,16 @@
           <search-bar
             placeholder="Search"
             class="input-group-alternative"
-            @textChanged="searchChanged">
+            @textChanged="searchChanged"
+          >
           </search-bar>
         </div>
       </form>
     </div>
     <div class="row mt-4 ml-5" style="width: 500px">
       <h2 style="color: white">
-        Välkommen till Forsviks-Guidens filarkiv. Här kan du hitta alla tänkbara nutida
-        och gamla bilder och dokument.
+        Välkommen till Forsviks-Guidens filarkiv. Här kan du hitta alla tänkbara
+        nutida och gamla bilder och dokument.
       </h2>
     </div>
   </base-nav>

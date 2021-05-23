@@ -32,14 +32,14 @@ namespace forsvikapi
             services.AddControllers();
             services.AddCors(options =>
             {
+                var corsSource = Configuration.GetValue<string>("WithOrigin");
                 options.AddPolicy("VueCorsPolicy", builder =>
                 {
                     builder
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials()
-                    .WithOrigins("http://forsvikarkiv.azurewebsites.net");
-                    //.WithOrigins("http://localhost:5001");
+                    .WithOrigins(corsSource);
                 });
             });
             services.Configure<IISServerOptions>(options =>

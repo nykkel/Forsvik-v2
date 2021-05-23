@@ -231,8 +231,10 @@ namespace Forsvik.Core.Database.Repositories
 
         public Guid AddOrUpdateFile(string fileName, byte[] data, Guid? folderId)
         {
-            var nameParts = fileName.Split('.');
-            if (nameParts.Length != 2)
+            var name = Path.GetFileNameWithoutExtension(fileName);
+            var extension = Path.GetExtension(fileName).TrimStart('.');
+                        
+            if (!name.HasValue() || !extension.HasValue())
                 throw new Exception("Incorrect filename: " + fileName);
 
             Core.Model.Context.File file;
@@ -248,9 +250,9 @@ namespace Forsvik.Core.Database.Repositories
                 file = new Core.Model.Context.File
                 {
                     Id = Guid.NewGuid(),
-                    Name = nameParts[0],
+                    Name = name,
                     Size = (int)(Convert.ToDouble(data.Length) / 1024),
-                    Extension = nameParts[1],
+                    Extension = extension,
                     FolderId = folderId,
                     Created = DateTime.Now
                 };
@@ -311,6 +313,11 @@ namespace Forsvik.Core.Database.Repositories
 
             // Return default image
             return DefaultThumnail(file.Name, file.Extension.ToLower());
+        }
+
+        public int GetFileSize(Guid fileId)
+        {
+            return Database.Files.FirstOrDefault(x => x.Id == fileId)!.Size;
         }
 
         public async Task<FileDataModel> GetFile(Guid fileId)

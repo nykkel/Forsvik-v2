@@ -12,7 +12,8 @@
 <template>
   <div>
     <div class="folder-view" v-show="currentFolder.imageFileId">
-      <img v-if="currentFolder.imageFileId"
+      <img
+        v-if="currentFolder.imageFileId"
         :src="imgFromId(currentFolder.imageFileId)"
         width="300"
         height="200"
@@ -74,7 +75,6 @@
                       <button
                         v-if="isLoggedIn"
                         style="width: 180px"
-                        
                         @click="addFolder"
                         class="btn-forsvik"
                       >
