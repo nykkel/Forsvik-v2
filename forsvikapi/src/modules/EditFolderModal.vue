@@ -189,6 +189,8 @@ export default {
               );
               img.src = url;
               img.style.opacity = 1;
+            } else {
+              this.clear();
             }
           });
       } else {
@@ -250,13 +252,9 @@ export default {
           );
         })
         .then((r) => {
+          console.log("uploaded image id", r.data.result);
           this.folder.imageFileId = r.data.result;
           let url = "/api/file/resource/" + r.data.result;
-
-          const img = document.getElementById("logoimg");
-          img.addEventListener("load", () =>
-            URL.revokeObjectURL(this.imageUrl)
-          );
           document.getElementById("logoimg").src = url;
         });
     },

@@ -58,7 +58,6 @@ namespace forsvikapi.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         [Route("search")]
         public async Task<ActionResult<List<SearchModel>>> Search(string query, SearchCategory category)
         {

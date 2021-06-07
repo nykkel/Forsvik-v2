@@ -6,7 +6,7 @@ namespace Forsvik.Core.Database
 {
     public class ArchivingContext : DbContext
     {
-        public ArchivingContext() : base("Server=tcp:nykkelsqlserver.database.windows.net,1433;Initial Catalog=forsvikdb;Persist Security Info=False;User ID=nykkeladmin;Password=Macg00!!!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;")
+        public ArchivingContext() : base("Server=81.95.105.77;Initial Catalog=e002497;User ID=e002497a;Password=Rumpnisse234;Connection Timeout=30;")
         { }
 
         //public ArchivingContext() : base("Data Source=.;Initial Catalog=ForsvikDb;Integrated Security=true;")

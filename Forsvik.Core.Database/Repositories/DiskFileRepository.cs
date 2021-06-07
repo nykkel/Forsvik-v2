@@ -111,14 +111,18 @@ namespace Forsvik.Core.Database.Repositories
                 try
                 {
                     var path = GetStore();
-                    var file = path + id.ToString() + _ext;
+                    var file = path + id + _ext;
 
-                    return File.ReadAllBytes(file);
+                    if (File.Exists(file))
+                        return File.ReadAllBytes(file);
+
+                    LogService.Error("Expected file missing: " + file);
+                    return new byte[0];
                 }
                 catch (Exception ex)
                 {
                     LogService.Error(ex.Message);
-                    throw;
+                    return new byte[0];
                 }
             });
         }

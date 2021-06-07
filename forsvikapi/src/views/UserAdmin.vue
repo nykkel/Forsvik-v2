@@ -149,6 +149,14 @@ export default {
         userId: user.id,
         isAdmin: !user.isAdmin,
       };
+      
+      let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      if (!body.isAdmin && currentUser.name == user.name) {
+        alert('Not allowed to remove admin permission from yourself!');
+        user.isAdmin = true;
+        return;
+      }
+
       axios.post("/api/admin/setadmin", body).then(() => alert("Sparat"));
     },
   },

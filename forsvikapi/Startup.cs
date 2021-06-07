@@ -89,7 +89,7 @@ namespace forsvikapi
             services.AddScoped<SearchRepository>();
             services.AddScoped<ILogService, LogService>();
             services.AddScoped<UserService>();            
-            services.AddScoped<IFileRepository, BlobFileRepository>();
+            services.AddScoped<IFileRepository, DiskFileRepository>();
             services.AddSingleton(Configuration);            
         }
 

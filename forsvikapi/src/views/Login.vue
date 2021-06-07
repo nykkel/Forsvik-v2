@@ -31,6 +31,7 @@
             />
 
             <label class="checkdiv">
+            <span style="font-size:16px">Kom ihåg inloggning</span>
               <input type="checkbox" v-model="model.rememberMe" />
               <span class="checkmark"></span>
             </label>

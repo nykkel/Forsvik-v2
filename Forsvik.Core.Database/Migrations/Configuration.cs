@@ -1,4 +1,8 @@
-﻿namespace Forsvik.Core.Database.Migrations
+﻿using System.Security.Cryptography;
+using System.Text;
+using Forsvik.Core.Model.Context;
+
+namespace Forsvik.Core.Database.Migrations
 {
     using System;
     using System.Data.Entity;
@@ -14,10 +18,30 @@
 
         protected override void Seed(ArchivingContext context)
         {
-            //  This method will be called after migrating to the latest version.
+            if (!context.Users.Any())
+            {
+                context.Users.Add(new User
+                {
+                    Id = Guid.NewGuid(),
+                    IsAdmin = true,
+                    Name = "Admin",
+                    UserName = "admin",
+                    PasswordHash = GeneratePasswordHash("fossvik")
+                });
+            }
+        }
 
-            //  You can use the DbSet<T>.AddOrUpdate() helper extension method
-            //  to avoid creating duplicate seed data.
+        private string GeneratePasswordHash(string password)
+        {
+            using (HashAlgorithm algorithm = SHA256.Create())
+            {
+                var bytehash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(password));
+                StringBuilder sb = new StringBuilder();
+                foreach (byte b in bytehash)
+                    sb.Append(b.ToString("X2"));
+
+                return sb.ToString();
+            }
         }
     }
 }

@@ -12,6 +12,10 @@ obj/
 /wwwroot/node_modules
 
 /public/archive
+/app/archive
+/app/js
+/app/css
+
 
 ### Node ###
 # Logs

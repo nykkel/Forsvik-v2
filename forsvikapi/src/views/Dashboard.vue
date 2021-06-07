@@ -25,7 +25,7 @@
               <div
                 v-for="archive in archives"
                 :key="archive.id"
-                class="col-lg-2 col-md-6 mb-6"
+                class="col-md-3 mb-4"
                 style="cursor: pointer"
               >
                 <archive-pane

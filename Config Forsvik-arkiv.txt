@@ -1,0 +1,15 @@
+Användarnamn: forsvik-arkiv.se
+Lösenord: XJsDqLqW4q
+Kundnummer: FA90-77-40-8871
+
+FTP:
+forsvik-arkiv.se
+s012435a
+Rumpnisse234
+
+Databas:
+
+IP:		81.95.105.77
+Databas:	e002497
+Användarnamn:	e002497a
+Password:	Rumpnisse234
