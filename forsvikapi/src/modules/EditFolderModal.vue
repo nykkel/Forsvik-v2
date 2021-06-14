@@ -179,18 +179,19 @@ export default {
           .then((response) => response.json())
           .then((data) => {
             this.folder = data;
+            
+            const img = document.getElementById("logoimg");
 
             if (data.imageFileId) {
               let url = "/api/file/resource/" + data.imageFileId;
-
-              const img = document.getElementById("logoimg");
+              
               img.addEventListener("load", () =>
                 URL.revokeObjectURL(this.imageUrl)
               );
               img.src = url;
               img.style.opacity = 1;
             } else {
-              this.clear();
+              img.src = this.imageUrl;
             }
           });
       } else {

@@ -6,11 +6,16 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Forsvik.Core.Database;
 using System;
+using System.IO;
+using System.Linq;
+using System.Net;
 using Forsvik.Core.Database.Repositories;
 using Forsvik.Core.Model.Interfaces;
 using forsvikapi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace forsvikapi
@@ -98,7 +103,8 @@ namespace forsvikapi
         {
             //if (env.IsDevelopment())
             //{
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
+                HandleExceptions(app);
             //}            
 
             app.UseCors("VueCorsPolicy");
@@ -117,6 +123,28 @@ namespace forsvikapi
                     builder.UseProxyToSpaDevelopmentServer("http://localhost:8080");
                 }
             });
+        }
+
+        public void HandleExceptions(IApplicationBuilder app)
+        { 
+            app.UseExceptionHandler(errorApp =>
+            {
+                errorApp.Run(async context =>
+                {
+                    var exceptionHandlerPathFeature =
+                        context.Features.Get<IExceptionHandlerPathFeature>();
+
+                    if (exceptionHandlerPathFeature != null)
+                    {
+                        var log = app.ApplicationServices.GetService<ILogService>();
+                        log?.Error("App exception1" + exceptionHandlerPathFeature.Error.Message);
+
+                        await context.Response.WriteAsync(
+                            exceptionHandlerPathFeature.Error.Message);
+                    }
+                });
+            });
+            app.UseHsts();
         }
     }
 }

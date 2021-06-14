@@ -172,8 +172,7 @@ export default {
       showQuickDownload: false,
       selectedFile: null,
       percentCompleted: 0,
-      showProgress: false,
-      fileLength: 1,
+      showProgress: false      
     };
   },
   watch: {
@@ -274,41 +273,71 @@ export default {
     downloadSelectedFiles() {
       this.showProgress = true;
 
-      var files = this.files.filter((f) => {
+      var selectedFiles = this.files.filter((f) => {
         return f.isSelected;
       });
-      if (files.length === 0) {
+      if (selectedFiles.length === 0) {
         this.showProgress = false;
         alert("Du har inte markerat några filer!");
         return;
       }
       const body = {
-        fileIds: files.map((file) => file.id),
+        fileIds: selectedFiles.map((file) => file.id),
       };
 
       var callback = this.updateCompleted;
       axios
-        .post("api/file/filesize", body)
+        .post("api/file/fileinfo", body)
           .then(response => {
-              this.fileLength = response.data;
+              let fileLength = response.data.fileLength;
+              let fileName = response.data.fileName;
               axios
-               .post("/api/file/resources", body, {
-                onDownloadProgress: function (progressEvent) {
+              ({
+                 url: "/api/file/resources",
+                 method:'POST',
+                 responseType: 'blob',
+                 data: body,
+                 onDownloadProgress: function (progressEvent) {
                   let completed = Math.round(
-                    (progressEvent.loaded * 100) / this.fileLength
+                    (progressEvent.loaded * 100) / fileLength
                   );
+                  completed = completed > 100 ? 100 : completed;
                   console.log(completed);
                   callback(completed);
                 },
               })              
               .then((response) => {
                 this.showProgress = false;
-                this.saveFile(response);
-              });
-
+                this.saveFile2(response.data, fileName);
+                this.clearSelections();
+              })
+              .catch(err => {
+                console.log(err);
+              })
             })
     },
+    clearSelections() {
+      this.files.forEach(f => {
+        f.isSelected = false;
+      })
+    },
+    saveFile2(blob, fileName) {
+      var fileURL = window.URL.createObjectURL(new Blob([blob]));
+      var fileLink = document.createElement('a');
+      fileLink.href = fileURL;
+      fileLink.setAttribute('download', fileName);
+      document.body.appendChild(fileLink);
+
+      fileLink.click();
+    },
     saveFile(response) {
+      let error = !response.data ? "C1" : (!response.data.data ? "C2" : (response.data.data.length === 0 ? "C3" : null));
+
+      if (error !== null)  {      
+        alert("Nedladdningen misslyckades: " + error);
+        return;
+      }
+
       this.showBusy();
       var data = response.data.data;
       var blob = this.b64toBlob(data, "", 1024);

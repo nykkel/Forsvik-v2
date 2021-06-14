@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data.Entity.Migrations;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -320,9 +321,27 @@ namespace Forsvik.Core.Database.Repositories
             return Database.Files.FirstOrDefault(x => x.Id == fileId)!.Size;
         }
 
+        public string GetFileName(Guid fileId)
+        {
+            return Database.Files.First(x => x.Id == fileId).ToString();
+        }
+
+
+        public async Task<byte[]> CreateZipFile(IEnumerable<Guid> fileIds)
+        {
+            var files = Database
+                .Files
+                .Where(f => fileIds.Contains(f.Id))
+                .OrderBy(x => x.Name)
+                .ToList()
+                .Select(x => new FileModel().SemanticCopy(x));
+            
+            return await FileRepository.CreateCompressedFile(files);
+        }
+
         public async Task<FileDataModel> GetFile(Guid fileId)
         {
-            var file = Database.Files.Find(fileId);
+            var file = await Database.Files.FindAsync(fileId);
             var data = await FileRepository.Get(fileId);            
 
             return new FileDataModel

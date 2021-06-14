@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Forsvik.Core.Model.External;
 
 namespace Forsvik.Core.Database.Repositories
 {
@@ -105,6 +106,11 @@ namespace Forsvik.Core.Database.Repositories
             }
             return null;
 
+        }
+
+        public Task<byte[]> CreateCompressedFile(IEnumerable<FileModel> files)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Guid> Save(byte[] data, Guid? preparedId = null)

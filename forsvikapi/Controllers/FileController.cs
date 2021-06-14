@@ -12,7 +12,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
+using FileInfo = Forsvik.Core.Model.External.FileInfo;
 
 namespace forsvikapi.Controllers
 {
@@ -30,13 +32,13 @@ namespace forsvikapi.Controllers
 
         [HttpGet]
         [Route("resource/{id}")]
-        public FileStreamResult Resource(Guid id)
+        public FileContentResult Resource(Guid id)
         {
             var file = Repository.GetFile(id).Result;
 
             if (file != null)
             {
-                return CreateResponseStream(file.Data, file.Name, file.Extension);
+                return CreateResponseContent(file.Data, file.Name, file.Extension);
             }
             
             return null;
@@ -44,13 +46,13 @@ namespace forsvikapi.Controllers
 
         [HttpGet]
         [Route("thumbnail/{id}")]
-        public FileStreamResult Thumbnail(Guid id)
+        public FileContentResult Thumbnail(Guid id)
         {
             var file = Repository.GetThumbnail(id).Result;
 
             if (file != null)
             {
-                return CreateResponseStream(file.Data, file.Name, file.Extension);
+                return CreateResponseContent(file.Data, file.Name, file.Extension);
             }
 
             return null;
@@ -137,62 +139,41 @@ namespace forsvikapi.Controllers
         }
 
         [HttpPost]
-        [Route("filesize")]
-        public async Task<ActionResult<int>> FileSize(FilesRequest request)
+        [Route("fileinfo")]
+        public async Task<ActionResult<FileInfo>> FileInfo(FilesRequest request)
         {
+            var fileName = request.FileIds.Count == 1
+                ? Repository.GetFileName(request.FileIds.First())
+                : "FileCollection.zip";
+
             var total = await Task.Factory.StartNew(() => request
                 .FileIds
                 .Select(id => Repository.GetFileSize(id))
                 .Sum());
 
-            return total * 1024;            
+            return new FileInfo
+            {
+                FileLength = total * 1024,
+                FileName = fileName
+            };
         }
 
         [HttpPost]
         [Route("resources")]
-        public async Task<ActionResult<DownloadModel>> Resources(FilesRequest request)
+        public async Task<FileContentResult> Resources(FilesRequest request)
         {
-            if (request.FileIds.Count == 0) return new EmptyResult();
+            if (request.FileIds.Count == 0) return null;
 
             if (request.FileIds.Count == 1)
             {
                 var file = await Repository.GetFile(request.FileIds.First());
-                HttpContext.Response.Headers.Add("File-Length", file.Data.Length.ToString());
 
-                return new DownloadModel
-                {
-                    Data = Convert.ToBase64String(file.Data),
-                    FileName = file.Name + "." + file.Extension
-                };
+                return new FileContentResult(file.Data, GetFileType(file.Extension));
             }
-
+            
             // Multiple files. Pack in zip..
-            using (var memoryStream = new MemoryStream())
-            {
-                using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
-                {
-                    foreach (var fileId in request.FileIds)
-                    {
-                        var file = await Repository.GetFile(fileId);
-
-                        var demoFile = archive.CreateEntry(file.FileName, CompressionLevel.Optimal);
-
-                        using (var entryStream = demoFile.Open())
-                        using (var fileToCompressStream = new MemoryStream(file.Data))
-                        {
-                            fileToCompressStream.CopyTo(entryStream);
-                        }
-                    }
-                }
-
-                var zipData = memoryStream.GetBuffer();
-
-                return new DownloadModel
-                {
-                    Data = Convert.ToBase64String(zipData),
-                    FileName = "Samlingsfil.zip"
-                };
-            }
+            var zipData = await Repository.CreateZipFile(request.FileIds);
+            return CreateResponseContent(zipData, "FileCollection", "Zip");
         }
     }
 }

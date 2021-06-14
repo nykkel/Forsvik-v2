@@ -1,7 +1,9 @@
 ﻿using Forsvik.Core.Model.External;
 using Forsvik.Core.Model.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -84,6 +86,53 @@ namespace Forsvik.Core.Database.Repositories
             });
         }
 
+        private async Task TryClearTempFolder()
+        {
+            var folder = GetTempStore();
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    foreach (var file in Directory.EnumerateFiles(folder))
+                    {
+                        File.Delete(file);
+                    }
+                });
+            }
+            catch
+            { 
+                // Accept failure to remove file in use
+            }
+        }
+
+        public async Task<byte[]> CreateCompressedFile(IEnumerable<FileModel> files)
+        {
+            await TryClearTempFolder();
+            
+            var zipFile = $"{GetTempStore()}{Guid.NewGuid()}.zip";
+
+            using (var outputStream = new FileStream(zipFile, FileMode.Create))
+            {
+                using (var archive = new ZipArchive(outputStream, ZipArchiveMode.Create, true))
+                {
+                    foreach (var file in files)
+                    {
+                        var zipEntry = archive.CreateEntry(file.FileName, CompressionLevel.Optimal);
+
+                        using (var entryStream = zipEntry.Open())
+                        {
+                            using (var fileToCompressStream = new FileStream(GetReference(file.Id), FileMode.Open))
+                            {
+                                fileToCompressStream.CopyTo(entryStream);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return await File.ReadAllBytesAsync(zipFile);
+        }
+
         public async void SaveThumbnail(byte[] data, Guid id)
         {
             await Task.Factory.StartNew(() =>
@@ -103,7 +152,18 @@ namespace Forsvik.Core.Database.Repositories
                 }
             });
         }
-        
+
+        public string GetReference(Guid id)
+        {
+            var path = GetStore();
+            var file = path + id + _ext;
+
+            if (File.Exists(file))
+                return file;
+
+            throw new Exception("File reference dont exist, " + file);
+        }
+
         public async Task<byte[]> Get(Guid id)
         {
             return await Task.Factory.StartNew(() =>
@@ -127,6 +187,15 @@ namespace Forsvik.Core.Database.Repositories
             });
         }
 
+        private string GetTempStore()
+        {
+            var path = ServerHost.PublicPath;
+            path = Path.Combine(path, "temp");
+            if (path.Last() != '\\')
+                path += '\\';
+
+            return path;
+        }
 
         private string GetStore()
         {
