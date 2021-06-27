@@ -175,8 +175,9 @@ namespace Forsvik.Core.Database.Repositories
 
                     if (File.Exists(file))
                         return File.ReadAllBytes(file);
-
+#if !DEBUG
                     LogService.Error("Expected file missing: " + file);
+#endif
                     return new byte[0];
                 }
                 catch (Exception ex)

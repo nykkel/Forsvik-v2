@@ -152,7 +152,7 @@ namespace forsvikapi.Controllers
         [Route("savefolder")]
         public async Task<ActionResult<Guid>> SaveFolder(FolderModel model)
         {
-            return await Task.Factory.StartNew(() => Repository.SaveFolder(model));            
+            return await Repository.SaveFolder(model);
         }
 
         [HttpGet]

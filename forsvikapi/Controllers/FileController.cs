@@ -65,17 +65,24 @@ namespace forsvikapi.Controllers
         {
             try
             {
+                LogService.Info($"SUPLOAD: 1");
+
                 if (file.Length == 0) return new ResponseModel<Guid> { Result = Guid.Empty };
+                LogService.Info($"SUPLOAD: 2");
+
                 var result = await Task.Factory.StartNew(() =>
                 {
                     MemoryStream target = new MemoryStream();
                     file.OpenReadStream().CopyTo(target);
                     byte[] data = target.ToArray();
+                    LogService.Info($"SUPLOAD: 3");
 
                     var r = Repository.AddOrUpdateFile(file.FileName, data, null);
                     LogService.Info("All uploaded");
                     return r;
                 });
+                LogService.Info($"SUPLOAD: 4");
+
                 return new ResponseModel<Guid> { Result = result };
             }
             catch(Exception ex)
@@ -91,23 +98,30 @@ namespace forsvikapi.Controllers
         public async Task<ActionResult<ResponseModel<bool>>> UploadFiles(IFormCollection fileCollection)
         {
             HttpContext.Request.Headers.TryGetValue("FolderId", out var folderId);
-            
+            LogService.Info($"UPLOAD: 1");
             try
             {
                 var ok = await Task.Factory.StartNew(() =>
                 {
                     foreach (var file in fileCollection.Files)
                     {
+                        LogService.Info($"UPLOAD: 2");
+
                         using (MemoryStream target = new MemoryStream())
                         {
                             file.OpenReadStream().CopyTo(target);
                             byte[] data = target.ToArray();
 
                             Repository.AddOrUpdateFile(file.FileName, data, new Guid(folderId.ToString()));
+                            LogService.Info($"UPLOAD: 3");
                         }
                     }
+                    LogService.Info($"UPLOAD: 4");
+
                     return true;
                 });
+                LogService.Info($"UPLOAD: 4");
+
                 return new ResponseModel<bool>{Result = true};
             }
             catch (Exception ex)

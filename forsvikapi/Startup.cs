@@ -109,7 +109,6 @@ namespace forsvikapi
 
             app.UseCors("VueCorsPolicy");
 
-            //dbContext.Database.EnsureCreated();
             app.UseAuthentication();            
 
             app.UseMvc();
@@ -137,7 +136,7 @@ namespace forsvikapi
                     if (exceptionHandlerPathFeature != null)
                     {
                         var log = app.ApplicationServices.GetService<ILogService>();
-                        log?.Error("App exception1" + exceptionHandlerPathFeature.Error.Message);
+                        log?.Error("App exception1: " + exceptionHandlerPathFeature.Error.Message);
 
                         await context.Response.WriteAsync(
                             exceptionHandlerPathFeature.Error.Message);

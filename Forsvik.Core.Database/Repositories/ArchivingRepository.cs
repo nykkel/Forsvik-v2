@@ -77,14 +77,22 @@ namespace Forsvik.Core.Database.Repositories
         {
             foreach (var id in fileIds)
             {
-                var file = Database.Files.Find(id);
-                FileRepository.Delete(id);
-                Database.Files.Remove(file);
-                Database.SaveChanges();
+                try
+                {
+                    var file = Database.Files.Find(id);
+                    FileRepository.Delete(id);
+                    Database.Files.Remove(file);
+                    Database.SaveChanges();
+                    LogService.Info($"File '{file?.Name}' removed");
+                }
+                catch (Exception e)
+                {
+                    LogService.Error($"File remove failed. {e.Message}");
+                }
             }
         }
 
-        public Guid SaveFolder(FolderModel model)
+        public async Task<Guid> SaveFolder(FolderModel model)
         {
             var folder = model.Id == Guid.Empty ? new Folder
             {
@@ -97,6 +105,7 @@ namespace Forsvik.Core.Database.Repositories
 
             var tagsChanged = folder.Tags != model.Tags;
 
+            var nameChanged = folder.Name != model.Name;
             folder.Name = model.Name;
             folder.Tags = model.Tags;
             folder.Index = model.Index;
@@ -106,13 +115,46 @@ namespace Forsvik.Core.Database.Repositories
 
             ReorderFolders(folder);
 
-            Database.SaveChanges();
+            await Database.SaveChangesAsync();
 
             if (tagsChanged)
             {
                 UpdateTags(model.Tags, folder.Id, EntityType.Folder);
             }
+
+            if (nameChanged)
+            {
+                await UpdatePaths(folder);
+            }
             return folder.Id;
+        }
+
+        private async Task UpdatePaths(Folder folder)
+        {
+            // Find root folder
+
+            while (folder != null) 
+            { 
+                var parent = folder.ParentFolder;
+                if (parent != null)
+                    folder = parent;
+                else
+                    break;
+            }
+
+            RecreateFilePaths(folder, "");
+            await Database.SaveChangesAsync();
+        }
+
+        private void RecreateFilePaths(Folder folder, string path)
+        {            
+            folder.Path = $"{path}/{folder.Name}";
+            Database.Folders.AddOrUpdate(folder);
+
+            foreach (Folder f in folder.Folders)
+            {
+                RecreateFilePaths(f, folder.Path);
+            }
         }
 
         private void ReorderFolders(Folder folder)
