@@ -211,7 +211,7 @@ export default {
     quickDownload() {
       this.showQuickDownload = false;
       this.selectedFile.isSelected = true;
-      this.files = [this.selectedFile];
+      //this.files = [this.selectedFile];
       this.downloadSelectedFiles();
     },
     gotoFolder(folderId) {
