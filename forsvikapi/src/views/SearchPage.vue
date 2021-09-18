@@ -29,7 +29,7 @@
                   <th style="width: 100px; cursor: pointer">Typ</th>
                   <th style="width: 300px; cursor: pointer">Beskrivning</th>
                   <th style="width: 200px; cursor: pointer">Sök-taggar</th>
-                  <th style="width: 200px">Sökväg</th>
+                  <th style="width: 200px">Katalog</th>
                   <th style="width: 30px"></th>
                 </tr>
                 <tr

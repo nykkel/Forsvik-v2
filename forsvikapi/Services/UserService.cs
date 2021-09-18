@@ -55,16 +55,7 @@ namespace forsvikapi.Services
         {
             Repository.AddUser(user.Name, user.UserName, user.IsAdmin, GeneratePasswordHash(user.Password));
         }
-
-        internal void SetUserAdmin(Guid id, bool isAdmin)
-        {
-            var user = Repository.GetUser(id);
-            user.IsAdmin = isAdmin;
-            Repository.SaveUser(user);
-
-            Log.Info("Admin rights changed for user " + user.UserName);
-        }
-
+        
         internal List<UserListItem> GetUsers()
         {
             return Repository
@@ -78,15 +69,6 @@ namespace forsvikapi.Services
                 }).ToList();
         }
 
-        internal void ResetPassword(Guid userId, string password)
-        {
-            var user = Repository.GetUser(userId);
-            user.PasswordHash = GeneratePasswordHash(password);
-            Log.Info("Password resetted for user " + user.UserName);
-
-            Repository.SaveUser(user);
-        }
-        
         private string GeneratePasswordHash(string password)
         {
             using (HashAlgorithm algorithm = SHA256.Create())
@@ -103,6 +85,20 @@ namespace forsvikapi.Services
         public bool IsDefaultFirstTimeUser()
         {
             return !Repository.GetUsers().Any();
+        }
+
+        public void UpdateUser(UpdateUserModel model)
+        {
+            var user = Repository.GetUser(model.Id).SemanticCopy(model);
+            if (model.Password.HasValue())
+                user.PasswordHash = GeneratePasswordHash(model.Password);
+
+            Repository.SaveUser(user);
+        }
+
+        public void DeleteUser(Guid userId)
+        {
+            Repository.DeleteUser(userId);
         }
     }
 }

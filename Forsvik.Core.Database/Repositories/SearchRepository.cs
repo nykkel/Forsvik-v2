@@ -42,7 +42,7 @@ namespace Forsvik.Core.Database.Repositories
                         Name = x.Name,
                         Extension = x.Extension,
                         Description = x.Description,
-                        Path = x.Folder.Path,
+                        Path = x.Folder.Name,
                         Tags = x.Tags
                     }));
             }

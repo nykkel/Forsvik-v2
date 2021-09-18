@@ -47,18 +47,18 @@ namespace forsvikapi.Controllers
         }
 
         [HttpPost]
-        [Route("resetpassword")]
-        public async Task<ActionResult<bool>> ResetPassword(ChangePasswordModel model)
+        [Route("update")]
+        public async Task<ActionResult<bool>> UpdateUser(UpdateUserModel model)
         {
-            await Task.Factory.StartNew(() => UserService.ResetPassword(model.Id, model.Password));
+            await Task.Factory.StartNew(() => UserService.UpdateUser(model));
             return true;
         }
-
+        
         [HttpPost]
-        [Route("setadmin")]
-        public async Task<ActionResult<bool>> SetAdmin(SetAdminModel model)
+        [Route("delete")]
+        public async Task<ActionResult<bool>> DeleteUser(UpdateUserModel model)
         {
-            await Task.Factory.StartNew(() => UserService.SetUserAdmin(model.UserId, model.IsAdmin));
+            await Task.Factory.StartNew(() => UserService.DeleteUser(model.Id));
             return true;
         }
 

@@ -54,6 +54,7 @@
                         Lägg till
                       </button>
                     </td>
+                    <td></td>
                   </tr>
                   <tr v-for="user in users" :key="user.userName">
                     <td>
@@ -70,8 +71,22 @@
                         <span class="checkmark"></span>
                       </label>
                     </td>
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.userName }}</td>
+                    <td>
+                      <input
+                        type="text"
+                        class="form-control form-control-alternative"
+                        v-model="user.name"
+                        placeholder="Namn"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        class="form-control form-control-alternative"
+                        v-model="user.userName"
+                        placeholder="Inloggning"
+                      />
+                    </td>
                     <td>
                       <input
                         type="text"
@@ -83,10 +98,10 @@
                     <td>
                       <button
                         class="btn btn-secondary"
-                        v-on:click="resetPassword(user.id, user.password)"
-                      >
-                        Återställ
-                      </button>
+                        v-on:click="saveUser(user)">Spara</button>
+                    </td>
+                    <td>
+                      <i class="far fa-trash-alt" style="cursor:pointer" title="Ta bort" v-on:click="deleteUser(user.id)"></i>
                     </td>
                   </tr>
                 </table>
@@ -127,6 +142,17 @@ export default {
         .catch((e) => alert(e))
         .then(() => this.loadUsers());
     },
+    deleteUser(id) {
+      if (confirm("Vill du verkligen ta bort denna användaren?")) {
+        var body = {
+          id: id
+        };
+        axios
+          .post("/api/admin/delete", body)
+          .catch((e) => alert(e))
+          .then(() => this.loadUsers());
+      }
+    },
     loadUsers() {
       fetch("/api/admin/users")
         .then((response) => response.json())
@@ -134,14 +160,9 @@ export default {
           this.users = users;
         });
     },
-    resetPassword(userId, pwd) {
-      const body = {
-        id: userId,
-        password: pwd,
-      };
-
-      axios.post("/api/admin/resetpassword", body).then(() => {
-        alert("Lösenordet är ändrat");
+    saveUser(user) {
+      axios.post("/api/admin/update", user).then(() => {
+        alert("Användaren sparad");
       });
     },
     changeIsAdmin(user) {
@@ -156,8 +177,6 @@ export default {
         user.isAdmin = true;
         return;
       }
-
-      axios.post("/api/admin/setadmin", body).then(() => alert("Sparat"));
     },
   },
 };

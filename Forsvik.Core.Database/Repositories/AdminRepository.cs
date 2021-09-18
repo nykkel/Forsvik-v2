@@ -100,5 +100,11 @@ namespace Forsvik.Core.Database.Repositories
                 return sb.ToString();
             }
         }
+
+        public void DeleteUser(Guid userId)
+        {
+            Database.Users.Remove(Database.Users.First(u => u.Id == userId));
+            Database.SaveChanges();
+        }
     }
 }
