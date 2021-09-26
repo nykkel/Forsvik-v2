@@ -675,8 +675,8 @@ input[type=text]:focus {
   
   /* Modal Content (image) */
   .modal-content1 {
-    max-height: 90%;
-    max-width:70%;
+    max-height: 95%;
+    max-width:95%;
     width:auto;    
     object-fit: scale-down;    
     margin: auto;    
@@ -701,6 +701,27 @@ input[type=text]:focus {
     to {transform:scale(1)}
   }
   
+  .move-next {
+    position: absolute;
+    top: 50%;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 60px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+  }
+  .move-back {
+    position: absolute;
+    top: 50%;
+    left: 35px;
+    color: #f1f1f1;
+    font-size: 60px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+  }
+
   /* The Close Button */
   .close-modal {
     position: absolute;
@@ -710,8 +731,8 @@ input[type=text]:focus {
     font-size: 40px;
     font-weight: bold;
     transition: 0.3s;
-  }
-  
+  }  
+
   .close-modal:hover,
   .close-modal:focus {
     color: #bbb;

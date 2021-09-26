@@ -54,7 +54,7 @@ export default {
   },
   methods: {
     imgFromId(id) {
-      return "/api/file/resource/" + id;
+      return "/api/file/thumbnail/" + id;
     },
     editArchive(evt) {
       this.$emit("editClicked", this.folderId);

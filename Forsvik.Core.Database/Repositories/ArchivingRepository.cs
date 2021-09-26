@@ -62,12 +62,16 @@ namespace Forsvik.Core.Database.Repositories
                 .ToList();
         }
 
-        public List<FileModel> GetFiles(Guid folderId)
+        public List<FileModel> GetFiles(Guid folderId, bool? sortAsc, SearchField searchField)
         {
-            return Database
+            var asc = sortAsc ?? true;
+
+            var files = Database
                 .Files
-                .Where(x => x.FolderId == folderId)
-                .OrderBy(x => x.Name)
+                .Where(x => x.FolderId == folderId);
+
+            return files
+                .OrderBy(searchField.ToString(), asc)
                 .ToList()
                 .Select(x => new FileModel().SemanticCopy(x))
                 .ToList();

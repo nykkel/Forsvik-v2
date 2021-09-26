@@ -16,11 +16,12 @@
                 <table class="hoverTable">
                   <tr>
                     <td>
+                      <p style="float:left;margin-top:-40px;font-size:12px;color:#cdcdcd">Admin</p>
                       <label
                         class="checkdiv"
                         style="vertical-align: top; margin-top: -12px"
-                      >
-                        <input
+                      >                      
+                        <input                          
                           type="checkbox"
                           v-model="user.isAdmin"
                           title="Administratör"

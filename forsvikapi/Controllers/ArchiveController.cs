@@ -130,9 +130,9 @@ namespace forsvikapi.Controllers
 
         [HttpGet]
         [Route("getfiles/{folderId}")]
-        public async Task<ActionResult<List<FileModel>>> GetFiles(Guid folderId)
+        public async Task<ActionResult<List<FileModel>>> GetFiles(Guid folderId, bool? sortAsc, SearchField searchField)
         {
-            var files = await Task.Factory.StartNew(() => Repository.GetFiles(folderId));
+            var files = await Task.Factory.StartNew(() => Repository.GetFiles(folderId, sortAsc, searchField));
             files.ForEach(file =>
             {
                 file.Url = $"file/resource/{file.Id}";

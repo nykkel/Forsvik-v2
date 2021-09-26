@@ -27,6 +27,7 @@
               placeholder="Lösenord"
               type="password"
               class="form-control mr-4 mb-4"
+              v-on:keyup.enter="doLogin"
               v-model="model.password"
             />
 

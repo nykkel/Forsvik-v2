@@ -42,11 +42,11 @@
       <tr class="heading-small text-muted mb-4">
         <th style="width: 100px; cursor: pointer">Välj</th>
         <th style="width: 100px; cursor: pointer">Ikon</th>
-        <th style="width: 300px; cursor: pointer">Namn</th>
-        <th style="width: 100px; cursor: pointer">Typ</th>
-        <th style="width: 100px; cursor: pointer">Storlek</th>
-        <th style="width: 300px; cursor: pointer">Beskrivning</th>
-        <th style="width: 300px; cursor: pointer">Sök-taggar</th>
+        <th style="width: 300px; cursor: pointer" v-on:click="onSort(0)">Namn <span style="font-size:8px;margin-left:20px">(sortera)</span></th>
+        <th style="width: 100px; cursor: pointer" v-on:click="onSort(1)">Typ</th>
+        <th style="width: 100px; cursor: pointer" v-on:click="onSort(2)">Storlek</th>
+        <th style="width: 300px; cursor: pointer" v-on:click="onSort(3)">Beskrivning</th>
+        <th style="width: 300px; cursor: pointer" v-on:click="onSort(4)">Sök-taggar</th>
         <th style="width: 200px"></th>
       </tr>
       <tr
@@ -69,7 +69,7 @@
           <edit-label
             @saveChanges="saveNameChanges"
             :itemId="file.id"
-            :inputText="file.name"
+            :inputText="file.name"            
           />
         </td>
         <td style="text-transform: uppercase" class="forsvik-text">
@@ -131,7 +131,8 @@
 
     <div id="pictureModal" class="modal">
       <span class="close-modal" @click="closeModal">&times;</span>
-
+      <span class="move-back" v-show="canMoveBack" @click="moveBack">&lt;</span>      
+      <span class="move-next" v-show="canMoveNext" @click="moveNext">&gt;</span>
       <img id="modalImg" class="modal-content1" />
     </div>
   </div>
@@ -172,7 +173,11 @@ export default {
       showQuickDownload: false,
       selectedFile: null,
       percentCompleted: 0,
-      showProgress: false      
+      showProgress: false,
+      currentIndex: 0,
+      canMoveBack: true,
+      canMoveNext: true,
+      switchOrder: true
     };
   },
   watch: {
@@ -193,15 +198,42 @@ export default {
       element.setAttribute("type", "hidden");
       alert("Kopierad!");
     },
+    onSort(column) {
+      this.switchOrder = !this.switchOrder;
+      this.loadFiles(column);
+    },
+    moveBack() {
+      if (this.currentIndex < 1) {
+        this.canMoveBack = false;
+        return;        
+      }
+      this.canMoveNext = true;  
+      this.currentIndex--;
+      let file = this.files[this.currentIndex];
+      this.openFile(file);
+    },
+    moveNext() {
+      if (this.currentIndex > this.files.length - 1) {
+        this.canMoveNext = false;
+        return;        
+      }        
+      this.canMoveBack = true;
+      this.currentIndex++;
+      let file = this.files[this.currentIndex];
+      this.openFile(file);
+    },
     openFile(file) {
+      this.currentIndex = this.files.indexOf(file);
       const ext = file.extension.toLowerCase();
       this.selectedFile = file;
+      this.canMoveBack = this.currentIndex > 0;
+      this.canMoveNext = this.currentIndex < this.files.length - 1;
 
       if (ext !== "jpg" && ext !== "jpeg" && ext !== "png") {
         this.showQuickDownload = true;
         return;
       }
-
+      
       var modal = document.getElementById("pictureModal");
       var modalImg = document.getElementById("modalImg");
 
@@ -246,19 +278,25 @@ export default {
       file.tags = item.text;
       this.saveFileChanges(file);
     },
-    loadFiles() {
+    loadFiles(column) {
       this.showBusy();
 
-      return fetch("/api/archive/getfiles/" + this.folderId)
+      let api = "/api/archive/getfiles/" + this.folderId;
+      api = this.switchOrder ? api + "?sortAsc=true" : api + "?sortAsc=false";      
+      if (column) {
+        api += "&searchField=" + column;
+      }
+
+      return fetch(api)
         .then((response) => response.json())
         .then((files) => {
           this.files = files;
           files.forEach((f) => {
             f.editName = false;
             f.editDescription = false;
-            f.editTags = false;
-            this.hideBusy();
+            f.editTags = false;             
           });
+          this.hideBusy();
         });
     },
     saveFileChanges(file) {

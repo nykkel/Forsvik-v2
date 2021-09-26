@@ -13,6 +13,7 @@
   <div>
     <div class="folder-view" v-show="currentFolder.imageFileId">
       <img
+        style="position:relative;top:20px"
         v-if="currentFolder.imageFileId"
         :src="imgFromId(currentFolder.imageFileId)"
         width="300"

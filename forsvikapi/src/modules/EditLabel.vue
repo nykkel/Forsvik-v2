@@ -23,7 +23,7 @@
       class="descDiv text-muted"
       @click="setEditMode"
     >
-      <div class="forsvik-text">{{ inputText }}&nbsp;</div>
+      <div class="forsvik-text">{{ displayText }}&nbsp;</div>
     </div>
     <div v-show="editMode" class="wrapper">
       <textarea
@@ -49,7 +49,9 @@
   </div>
 </template>
 <script>
+import CommonMixin from "../mixins/commonMixin";
 export default {
+  mixins: [CommonMixin],
   name: "edit-label",
   props: {
     itemId: String,
@@ -61,10 +63,12 @@ export default {
       editMode: false,
       boundText: null,
       internalId: null,
+      displayText: null
     };
   },
   created() {
     this.internalId = this.guidGenerator();
+    this.displayText = this.truncateString(this.inputText, 45);
   },
   methods: {
     setEditMode() {
