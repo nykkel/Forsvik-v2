@@ -57,6 +57,7 @@ export default {
     itemId: String,
     inputText: String,
     ghostText: String,
+    isReadOnly: Boolean
   },
   data() {
     return {
@@ -72,6 +73,7 @@ export default {
   },
   methods: {
     setEditMode() {
+      if (this.isReadOnly) return;
       this.editMode = true;
       this.boundText = this.inputText;
       document.getElementById(this.internalId).focus();
@@ -79,6 +81,7 @@ export default {
     saveChanges() {
       this.editMode = false;
       this.$emit("saveChanges", { id: this.itemId, text: this.boundText });
+      this.displayText = this.truncateString(this.boundText, 45);
     },
     cancel() {
       this.editMode = false;

@@ -25,7 +25,7 @@
         Ladda ner
       </button>
       <button
-        v-if="isLoggedIn"
+        v-if="isAdmin"
         type="button"
         class="btn-forsvik"
         @click="showDeleteModal"
@@ -69,7 +69,8 @@
           <edit-label
             @saveChanges="saveNameChanges"
             :itemId="file.id"
-            :inputText="file.name"            
+            :inputText="file.name"
+            :isReadOnly="!isLoggedIn"
           />
         </td>
         <td style="text-transform: uppercase" class="forsvik-text">
@@ -83,6 +84,7 @@
             @saveChanges="saveDescriptionChanges"
             :itemId="file.id"
             :inputText="file.description"
+            :isReadOnly="false"
           />
         </td>
         <td>
@@ -90,11 +92,12 @@
             @saveChanges="saveTagsChanges"
             :itemId="file.id"
             :inputText="file.tags"
+            :isReadOnly="false"
             ghostText="Ange kommaseparerat (tag1, tag2...)"
           />
         </td>
         <td>
-          <div title="Kopiera url" @click="fileUrlToClipboard(file)">
+          <div title="Kopiera adress" @click="fileUrlToClipboard(file)">
             <i class="fas fa-external-link-alt"></i>
           </div>
         </td>
@@ -163,6 +166,9 @@ export default {
     },
     isLoggedIn() {
       return window.currentUser().isLoggedIn;
+    },
+    isAdmin() {
+      return window.currentUser().isAdmin;
     },
   },
   data() {
@@ -253,7 +259,7 @@ export default {
       var modal = document.getElementById("pictureModal");
       modal.style.display = "none";
     },
-    showDeleteModal() {
+    showDeleteModal() {      
       if (this.files.find((f) => f.isSelected)) {
         this.showDelete = true;
       } else {

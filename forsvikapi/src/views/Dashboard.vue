@@ -11,7 +11,7 @@
                 </div>
                 <div class="col-md-6 text-right">
                   <button
-                    v-if="isLoggedIn"
+                    v-if="isAdmin"
                     type="button"
                     @click="addArchive"
                     class="btn-forsvik"
@@ -69,6 +69,9 @@ export default {
     isLoggedIn() {
       return window.currentUser().isLoggedIn;
     },
+    isAdmin() {
+      return window.currentUser().isAdmin;
+    },    
   },
   mounted() {
     this.loadArchives();

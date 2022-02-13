@@ -74,7 +74,7 @@
                     </div>
                     <div class="col-md-3 text-right">
                       <button
-                        v-if="isLoggedIn"
+                        v-if="isAdmin"
                         style="width: 180px"
                         @click="addFolder"
                         class="btn-forsvik"
@@ -173,6 +173,9 @@ export default {
     isLoggedIn() {
       return window.currentUser().isLoggedIn;
     },
+    isAdmin() {
+      return window.currentUser().isAdmin;
+    },    
   },
   watch: {
     folderId(value) {

@@ -10,13 +10,6 @@
                   <h1>Sökresultat</h1>
                 </div>
                 <div class="col-md-6 text-right">
-                  <!-- <button
-                    type="button"
-                    @click="addArchive"
-                    class="btn btn-default"
-                  >
-                    Lägg till arkiv
-                  </button> -->
                 </div>
               </div>
             </template>
