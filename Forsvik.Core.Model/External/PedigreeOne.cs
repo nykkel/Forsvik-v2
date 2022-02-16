@@ -29,5 +29,6 @@ namespace Forsvik.Core.Model.External
         public string Contribute { get; set; }
         public string Suggestions { get; set; }
         public string Parish { get; set; }
+        public bool IsSlaktImportant { get; set; }
     }
 }

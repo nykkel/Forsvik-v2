@@ -11,6 +11,7 @@
                   <h2>Carlsborgs Släktforskarförening</h2>
                 </div>
                 <div class="col-md-6 text-right">
+                  <img src="img/carlsborglogo.png" height="100"/>
                 </div>
               </div>
             </template>
@@ -189,7 +190,7 @@
               </table>
               <table class="hoverTable forsvik-text" style="margin-top:20px">
                 <tr>
-                  <td class="t300"><label>Är städdagar viktiga för dig?</label></td>        
+                  <td class="t300"><label>Är stöddagar viktiga för dig?</label></td>        
                   <td>
                     <div class="row">
                       <div class="col-2">
@@ -328,8 +329,7 @@
               </table>
               <table class="hoverTable forsvik-text" style="margin-top:20px">
                 <tr>
-                  <td><label>Det vore trevligt, om du vill skriv ner högst 5 socknar, där du har dina anfäder. Vi kanske är släkt!<bt/>
-                  Uppgifterna kommer att finnas i medlemsmatrikeln.</label></td>                          
+                  <td><label>Det vore trevligt, om du vill skriv ner högst 5 socknar, där du har dina anfäder. Vi kanske är släkt!</label></td>                          
                 </tr>
                 <tr>
                    <td>
@@ -341,6 +341,29 @@
                     />
                   </td>
                 </tr>
+              </table>
+              <table class="hoverTable forsvik-text" style="margin-top:20px">
+                <tr>
+                  <td class="t300"><label>Är Släktforskarföreningen viktig för dig?</label></td>        
+                  <td>
+                    <div class="row">
+                      <div class="col-2">
+                        <label class="checkdiv">
+                          <span style="font-size:16px">Ja</span>
+                          <input type="checkbox" v-model="model.isSlaktImportant" />
+                          <span class="checkmark"></span>
+                        </label>
+                      </div>
+                      <div class="col-3">
+                        <label class="checkdiv">
+                          <span style="font-size:16px">Nej</span>
+                          <input type="checkbox" @click="model.isSlaktImportant = false" />
+                          <span class="checkmark"></span>
+                        </label>
+                      </div>
+                    </div>
+                  </td>
+                </tr> 
               </table>
             </div>
             <div class="row">
