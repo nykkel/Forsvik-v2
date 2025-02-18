@@ -32,44 +32,27 @@
                       v-for="nav in navigation"
                       :key="nav.folderId"
                       class="text-success mr-3"
-                    >
+                    >                    
                       <router-link
                         :to="nav.route"
                         class="heading-small text-gray"
                         style="font-size: 13px; display: inline-block"
                         >{{ nav.name }}</router-link
-                      >
+                      >                      
                       <span style="font-size: 30px; margin-left: 10px">|</span>
                     </div>
                   </div>
                 </div>
                 <div class="col-md-8">
                   <div class="row">
-                    <div class="col-md-3">
-                      <h2 class="heading-small text-muted" style="padding: 3px">
-                        Namn
-                      </h2>
-                      <edit-label
-                        @saveChanges="saveFolderName"
-                        :itemId="folderId"
-                        :inputText="currentFolder.name"
-                      />
-                    </div>
-                    <div class="col-md-3">
-                      <h2 class="heading-small text-muted">Sök-taggar</h2>
-                      <edit-label
-                        @saveChanges="saveFolderTags"
-                        :itemId="folderId"
-                        ghostText="Ange kommaseparerat (tag1, tag2...)"
-                        :inputText="currentFolder.tags"
-                      />
-                    </div>
-                    <div class="col-md-3">
+                    <div class="col-md-9">
                       <h2 class="heading-small text-muted">Beskrivning</h2>
                       <edit-label
+                        style="margin-top:-10px"
                         @saveChanges="saveFolderDescription"
                         :itemId="folderId"
                         :inputText="currentFolder.description"
+                        :isReadOnly="!isLoggedIn"
                       />
                     </div>
                     <div class="col-md-3 text-right">

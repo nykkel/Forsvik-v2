@@ -19,7 +19,7 @@
     <div class="card-body">
       <div class="row text-muted">
         <div class="col">
-          <p class="forsvik-text" style="font-size: 14px">
+          <p class="forsvik-text" style="font-size: 14px;max-height: 200px;overflow-y: auto">
             {{ folder.description }}
           </p>
         </div>

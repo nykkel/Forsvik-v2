@@ -17,7 +17,7 @@
         <div class="card-body px-lg-5 py-lg-5">
           <form role="form">
             <input
-              placeholder="Email"
+              placeholder="Användarnamn"
               type="text"
               class="form-control mr-4 mb-4"
               v-model="model.email"

@@ -43,7 +43,7 @@
         background-position: center top;
       "
     >
-      <span class="mask bg-gradient-indigo opacity-8"></span>
+      <span class="mask bg-gradient-gray opacity-8"></span>
 
       <div class="row" style="padding: 20px">
         <div class="col-md-4">
@@ -76,7 +76,7 @@
         <div class="col-md-6">
           <slot name="folderimage" style="position: fixed"></slot>
           <h2 style="color: white; width: 500px" v-if="showBigText">
-            Välkommen till Forsviks filarkiv. Här kan du hitta alla tänkbara
+            Välkommen till Forsviks filarkiv. Här kan du hitta
             nutida och gamla bilder och dokument.
           </h2>
         </div>

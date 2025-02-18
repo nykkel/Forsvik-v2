@@ -20,8 +20,7 @@
                   <th style="width: 100px; cursor: pointer">Ikon</th>
                   <th style="width: 300px; cursor: pointer">Namn</th>
                   <th style="width: 100px; cursor: pointer">Typ</th>
-                  <th style="width: 300px; cursor: pointer">Beskrivning</th>
-                  <th style="width: 200px; cursor: pointer">Sök-taggar</th>
+                  <th style="cursor: pointer">Beskrivning</th>
                   <th style="width: 200px">Katalog</th>
                   <th style="width: 30px"></th>
                 </tr>
@@ -41,9 +40,6 @@
                   </td>
                   <td>
                     <label class="forsvik-text" v-text="hit.description" />
-                  </td>
-                  <td>
-                    <label class="forsvik-text" v-text="hit.tags" />
                   </td>
                   <td>
                     <label class="forsvik-text" v-text="hit.path" />
@@ -67,17 +63,22 @@
       </div>
     </div>
     <div id="pictureModal" class="modal">
+      <span class="download-modal fa fa-download" @click="quickDownload" title="Ladda ner med full upplösning"></span>
       <span class="close-modal" @click="closeModal">&times;</span>
       <img id="modalImg" class="modal-content1" :src="getImageUrl" />
     </div>
   </div>
 </template>
 <script>
+import DownloadMixin from "../mixins/fileDownloadMixin";
+
 export default {
+  mixins: [DownloadMixin],
   data() {
     return {
       searchHits: [],
       lastSearch: null,
+      selectedFileId: null
     };
   },
   computed: {
@@ -98,6 +99,9 @@ export default {
   },
 
   methods: {
+    quickDownload() {
+      this.downloadFile(this.selectedFileId);
+    },
     thumbnailFromId(id) {
       return "/api/file/thumbnail/" + id;
     },
@@ -145,6 +149,7 @@ export default {
 
       modal.style.display = "block";
       modalImg.src = "/api/file/resource/" + hit.entityId;
+      this.selectedFileId = hit.entityId;
     },
     closeModal() {
       var modal = document.getElementById("pictureModal");

@@ -38,8 +38,8 @@ namespace forsvikapi.Services
 
         public static void StaticError(string message)
         {
-            var repo = new LogRepository(new ArchivingContext(Startup.Configuration.GetConnectionString("ForsvikDb")));
-            repo.AddLog(message, ERR);
+            //var repo = new LogRepository(new ArchivingContext(Startup.Configuration.GetConnectionString("ForsvikDb")));
+            //repo.AddLog(message, ERR);
         }
 
         public List<LogModel> GetLogs()

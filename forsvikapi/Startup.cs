@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
 
 namespace forsvikapi
 {
@@ -57,12 +58,7 @@ namespace forsvikapi
             });
 
             RegisterAuthentication(services);
-            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            //    .AddJwtBearer(options =>
-            //    {
-            //        options.Authority = Configuration["Okta:Authority"];
-            //        options.Audience = "api://default";
-            //    });
+
             services.AddMvc(option => 
             {
                 option.EnableEndpointRouting = false;
@@ -70,6 +66,12 @@ namespace forsvikapi
             });
 
             RegisterServices(services);
+
+            services.AddDbContext<ArchivingContext>((builder =>
+            {
+                var connectionString = Configuration["ConnectionStrings:ForsvikDb"];
+                builder.UseSqlServer(connectionString);
+            }));
         }
 
         private void RegisterAuthentication(IServiceCollection services)
@@ -87,7 +89,8 @@ namespace forsvikapi
         {
             services.AddScoped<ArchivingContext>();
             services.AddScoped<ArchivingRepository>();
-            services.AddScoped<DocumentRepository>();
+            services.AddScoped<ResourceDocumentStore>();
+            //services.AddScoped<IFileRepository, DocumentFileRepository>();
             services.AddScoped<AdminRepository>();            
             services.AddScoped<LogRepository>();
             services.AddScoped<ErrorHandlingFilter>();            
@@ -95,7 +98,7 @@ namespace forsvikapi
             services.AddScoped<ILogService, LogService>();
             services.AddScoped<UserService>();            
             services.AddScoped<IFileRepository, DiskFileRepository>();
-            services.AddSingleton(Configuration);            
+            services.AddSingleton(Configuration);   
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

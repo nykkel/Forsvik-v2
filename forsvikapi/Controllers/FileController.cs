@@ -14,7 +14,10 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using MetadataExtractor;
+using MetadataExtractor.Formats.Exif;
 using FileInfo = Forsvik.Core.Model.External.FileInfo;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace forsvikapi.Controllers
 {
@@ -26,8 +29,7 @@ namespace forsvikapi.Controllers
         public FileController(
             ILogService logService,
             IWebHostEnvironment hostingEnvironment,
-            ArchivingRepository archivingRepository,
-            DocumentRepository documentRepository) : base(logService, hostingEnvironment, archivingRepository, documentRepository)
+            ArchivingRepository archivingRepository) : base(logService, hostingEnvironment, archivingRepository)
         { }
 
         [HttpGet]
@@ -36,19 +38,34 @@ namespace forsvikapi.Controllers
         {
             var file = Repository.GetFile(id).Result;
 
-            if (file != null)
-            {
-                return CreateResponseContent(file.Data, file.Name, file.Extension);
-            }
-            
-            return null;
+            if (file == null) return null;
+
+            if (IsJpg(file.Extension))
+                file.Data = CompressImage(file.Data, 50);
+
+            return CreateResponseContent(file.Data, file.Name, file.Extension);
         }
 
         [HttpGet]
         [Route("thumbnail/{id}")]
         public FileContentResult Thumbnail(Guid id)
         {
-            var file = Repository.GetThumbnail(id).Result;
+            var type = Repository.GetFileInfo(id).GetAwaiter().GetResult();
+
+            FileDataModel file;
+
+            if (type != null && IsJpg(type.Extension))
+            {
+                file = Repository.GetFile(id).Result;
+
+                if (file == null) return null;
+                if (file.Data.Length == 0) return null; // Metadata exists but file missing!
+
+                file.Data = CompressImage(file.Data, 10);
+                return CreateResponseContent(file.Data, file.Name, file.Extension);
+            }
+
+            file = Repository.GetThumbnail(id).Result;
 
             if (file != null)
             {
@@ -59,7 +76,6 @@ namespace forsvikapi.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [Route("uploadfile")]
         public async Task<ActionResult<ResponseModel<Guid>>> UploadFile(IFormFile file)
         {
@@ -70,17 +86,25 @@ namespace forsvikapi.Controllers
                 if (file.Length == 0) return new ResponseModel<Guid> { Result = Guid.Empty };
                 LogService.Info($"SUPLOAD: 2");
 
-                var result = await Task.Factory.StartNew(() =>
+                MemoryStream target = new MemoryStream();
+                file.OpenReadStream().CopyTo(target);
+                target.Position = 0;
+                DateTime? date = null;
+                try
                 {
-                    MemoryStream target = new MemoryStream();
-                    file.OpenReadStream().CopyTo(target);
-                    byte[] data = target.ToArray();
-                    LogService.Info($"SUPLOAD: 3");
+                    date = ExtractMetaData(target);
+                }
+                catch (Exception e)
+                {
+                    LogService.Error("Error extractid data " + e);
+                }
+                target.Position = 0;
+                byte[] data = target.ToArray();
+                LogService.Info($"SUPLOAD: 3");
 
-                    var r = Repository.AddOrUpdateFile(file.FileName, data, null);
-                    LogService.Info("All uploaded");
-                    return r;
-                });
+                var result = await Repository.AddOrUpdateFile(file.FileName, data, null, date);
+                LogService.Info("All uploaded");
+
                 LogService.Info($"SUPLOAD: 4");
 
                 return new ResponseModel<Guid> { Result = result };
@@ -92,8 +116,26 @@ namespace forsvikapi.Controllers
             }
         }
 
-        [HttpPut]
-        [Authorize]
+        private static DateTime? ExtractMetaData(Stream stream)
+        {
+            var directories = ImageMetadataReader.ReadMetadata(stream);
+
+            // access the date time
+            var subIfdDirectory = directories.OfType<ExifSubIfdDirectory>().FirstOrDefault();
+            var dateTime = subIfdDirectory?.Tags.FirstOrDefault(x => x.Name.StartsWith("Date/Time"));
+
+            if (dateTime != null)
+            {
+                var parts = dateTime.Description!.Split(' ');
+                var date = parts[0].Replace(':', '-');
+                var time = parts[1];
+                return DateTime.Parse($"{date} {time}");
+            }
+
+            return null;
+        }
+
+        [HttpPost]
         [Route("uploadfiles")]
         public async Task<ActionResult<ResponseModel<bool>>> UploadFiles(IFormCollection fileCollection)
         {
@@ -101,26 +143,30 @@ namespace forsvikapi.Controllers
             LogService.Info($"UPLOAD: 1");
             try
             {
-                var ok = await Task.Factory.StartNew(() =>
+                foreach (var file in fileCollection.Files)
                 {
-                    foreach (var file in fileCollection.Files)
+                    LogService.Info($"UPLOAD: 2");
+
+                    using (MemoryStream target = new MemoryStream())
                     {
-                        LogService.Info($"UPLOAD: 2");
-
-                        using (MemoryStream target = new MemoryStream())
+                        file.OpenReadStream().CopyTo(target);
+                        target.Position = 0;
+                        DateTime? date = null;
+                        try
                         {
-                            file.OpenReadStream().CopyTo(target);
-                            byte[] data = target.ToArray();
-
-                            Repository.AddOrUpdateFile(file.FileName, data, new Guid(folderId.ToString()));
-                            LogService.Info($"UPLOAD: 3");
+                            date = ExtractMetaData(target);
                         }
-                    }
-                    LogService.Info($"UPLOAD: 4");
+                        catch (Exception e)
+                        {
+                            LogService.Error("Error extractid data " + e);
+                        }
+                        target.Position = 0;
+                        byte[] data = target.ToArray();
 
-                    return true;
-                });
-                LogService.Info($"UPLOAD: 4");
+                        await Repository.AddOrUpdateFile(file.FileName, data, new Guid(folderId.ToString()), date);
+                        LogService.Info($"UPLOAD: 3");
+                    }
+                }
 
                 return new ResponseModel<bool>{Result = true};
             }
@@ -132,7 +178,6 @@ namespace forsvikapi.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [Route("delete")]
         public async Task<ActionResult<bool>> Delete(FilesRequest request)
         {
@@ -144,7 +189,6 @@ namespace forsvikapi.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [Route("removefolder")]
         public async Task<ActionResult<bool>> RemoveFolder(RemoveFolderModel model)
         {
@@ -189,5 +233,7 @@ namespace forsvikapi.Controllers
             var zipData = await Repository.CreateZipFile(request.FileIds);
             return CreateResponseContent(zipData, "FileCollection", "Zip");
         }
+
+
     }
 }

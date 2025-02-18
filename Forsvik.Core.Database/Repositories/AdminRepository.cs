@@ -3,10 +3,10 @@ using Forsvik.Core.Model.External;
 using Forsvik.Core.Model.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Forsvik.Core.Utilities.Extensions;
 
 namespace Forsvik.Core.Database.Repositories
 {
@@ -69,7 +69,14 @@ namespace Forsvik.Core.Database.Repositories
 
         public void SaveUser(User user)
         {
-            Database.Users.AddOrUpdate(user);
+            var entity = Database.Users.Find(user.Id);
+            if (entity != null)
+            {
+                entity.SemanticCopy(user.Id);
+            }
+            else
+                Database.Users.Add(user);
+            
             Database.SaveChanges();
         }
 

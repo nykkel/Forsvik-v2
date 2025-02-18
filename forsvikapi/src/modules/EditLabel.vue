@@ -23,7 +23,7 @@
       class="descDiv text-muted"
       @click="setEditMode"
     >
-      <div class="forsvik-text">{{ displayText }}&nbsp;</div>
+    <div class="forsvik-text" style="font-size:14px;max-height:50px;overflow-y: hidden">{{ inputText }}&nbsp;</div>
     </div>
     <div v-show="editMode" class="wrapper">
       <textarea
@@ -64,16 +64,16 @@ export default {
       editMode: false,
       boundText: null,
       internalId: null,
-      displayText: null
     };
   },
-  created() {
+  mounted() {
     this.internalId = this.guidGenerator();
-    this.displayText = this.truncateString(this.inputText, 45);
   },
   methods: {
-    setEditMode() {
-      if (this.isReadOnly) return;
+    setEditMode() {      
+      if (this.isReadOnly) {        
+       return;
+      }
       this.editMode = true;
       this.boundText = this.inputText;
       document.getElementById(this.internalId).focus();
@@ -81,7 +81,6 @@ export default {
     saveChanges() {
       this.editMode = false;
       this.$emit("saveChanges", { id: this.itemId, text: this.boundText });
-      this.displayText = this.truncateString(this.boundText, 45);
     },
     cancel() {
       this.editMode = false;

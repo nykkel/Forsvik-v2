@@ -20,7 +20,7 @@
                 <div
                   class="text-right"
                   v-on:click="doSearch"
-                  style="cursor: pointer; color: #aaa"
+                  style="cursor: pointer; color: white"
                 >
                   <i class="fas fa-search"></i>
                 </div>
