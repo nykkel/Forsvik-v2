@@ -6,6 +6,9 @@ using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace Forsvik.Core.Database.Repositories
 {
@@ -16,11 +19,11 @@ namespace Forsvik.Core.Database.Repositories
 
         public SearchRepository(ArchivingContext database)
         {
-            ConnectionString = database.Database.Connection.ConnectionString;
+            ConnectionString = database.Database.GetConnectionString();
             Database = database;
         }
 
-        public List<SearchModel> Find(string searchText, SearchCategory category)
+        public async Task<List<SearchModel>> Find(string searchText, SearchCategory category)
         {
             var items = new List<SearchModel>();
             var parts = GetSearchParts(searchText);
@@ -29,12 +32,14 @@ namespace Forsvik.Core.Database.Repositories
             {
                 var fileIds = GetFileIds(parts, category);
 
-                items.AddRange(Database
+                var models = await Database
                     .Files
+                    .Include(f => f.Folder)
                     .Where(x => fileIds.Contains(x.Id))
                     .Where(x => x.Folder != null)
-                    .ToList()
-                    .Select(x => new SearchModel
+                    .ToListAsync();
+
+                    items.AddRange(models.Select(x => new SearchModel
                     {
                         EntityId = x.Id,
                         EntityType = Model.Context.EntityType.File,
@@ -51,10 +56,12 @@ namespace Forsvik.Core.Database.Repositories
             {
                 var folderIds = GetFolderIds(parts, category);
 
-                items.AddRange(Database
+                var models = await Database
                     .Folders
                     .Where(x => folderIds.Contains(x.Id))
-                    .ToList()
+                    .ToListAsync();
+
+                items.AddRange(models
                     .Select(x => new SearchModel
                     {
                         EntityId = x.Id,

@@ -24,8 +24,7 @@ namespace forsvikapi.Controllers
             ILogService logService,
             IWebHostEnvironment hostingEnvironment,
             ArchivingRepository archivingRepository,            
-            UserService userService, 
-            DocumentRepository documentRepository) : base(logService, hostingEnvironment, archivingRepository, documentRepository)
+            UserService userService) : base(logService, hostingEnvironment, archivingRepository)
         {
             UserService = userService;
         }

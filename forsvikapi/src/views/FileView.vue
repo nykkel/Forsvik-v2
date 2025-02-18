@@ -46,7 +46,6 @@
         <th style="width: 100px; cursor: pointer" v-on:click="onSort(1)">Typ</th>
         <th style="width: 100px; cursor: pointer" v-on:click="onSort(2)">Storlek</th>
         <th style="width: 300px; cursor: pointer" v-on:click="onSort(3)">Beskrivning</th>
-        <th style="width: 300px; cursor: pointer" v-on:click="onSort(4)">Sök-taggar</th>
         <th style="width: 200px"></th>
       </tr>
       <tr
@@ -84,17 +83,11 @@
             @saveChanges="saveDescriptionChanges"
             :itemId="file.id"
             :inputText="file.description"
-            :isReadOnly="false"
+            :isReadOnly="!isLoggedIn"
           />
         </td>
         <td>
-          <edit-label
-            @saveChanges="saveTagsChanges"
-            :itemId="file.id"
-            :inputText="file.tags"
-            :isReadOnly="false"
-            ghostText="Ange kommaseparerat (tag1, tag2...)"
-          />
+          <div class="forsvik-text" :class="{ trueCreated: file.retrievedCreatedFromImage }">{{ file.createdDate }}</div>
         </td>
         <td>
           <div title="Kopiera adress" @click="fileUrlToClipboard(file)">
@@ -133,11 +126,13 @@
     </modal>
 
     <div id="pictureModal" class="modal">
-      <span class="close-modal" @click="closeModal">&times;</span>
+      <span class="download-modal fa fa-download" @click="quickDownload" title="Ladda ner med full upplösning"></span>
+       <span class="close-modal" @click="closeModal">&times;</span>
       <span class="move-back" v-show="canMoveBack" @click="moveBack">&lt;</span>      
       <span class="move-next" v-show="canMoveNext" @click="moveNext">&gt;</span>
       <img id="modalImg" class="modal-content1" />
     </div>
+    
   </div>
 </template>
 <script>
@@ -195,6 +190,9 @@ export default {
     },
   },
   methods: {
+    openInNewTab(file) {
+      window.open(`${window.location.origin}/api/file/resource/${file.id}`);
+    },
     fileUrlToClipboard(file) {
       var element = document.getElementById("copyInput");
       element.setAttribute("type", "text");
@@ -235,8 +233,13 @@ export default {
       this.canMoveBack = this.currentIndex > 0;
       this.canMoveNext = this.currentIndex < this.files.length - 1;
 
-      if (ext !== "jpg" && ext !== "jpeg" && ext !== "png") {
-        this.showQuickDownload = true;
+      if (ext === "pdf") {
+        this.openInNewTab(file);
+        return;
+      }
+
+      if (ext === "mp3" || ext === "docx" || ext === "xlsx" || ext === "tif") {
+        this.quickDownload();
         return;
       }
       
@@ -411,7 +414,7 @@ export default {
       }
       var callback = this.updateCompleted;
       axios
-        .put("/api/file/uploadfiles", formData, {
+        .post("/api/file/uploadfiles", formData, {
           headers: {
             folderId: `${this.folderId}`,
             "Content-Type": "multipart/form-data",
@@ -439,8 +442,8 @@ export default {
           this.showProgress = false;
           this.percentCompleted = 0;
         });
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -457,6 +460,11 @@ export default {
   top: 50%;
   left: 50%;
   margin-top: -100px;
-  margin-left: -100px;
+  margin-left: -100px;  
+}
+.trueCreated {
+  background: #98EAA7;
+  padding:10px;
+  border-radius: 5px;
 }
 </style>

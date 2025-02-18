@@ -14,7 +14,7 @@
 .search-frame {
   background-color: transparent;  
   border-radius: 30px;
-  border:2px solid #aaa;
+  border:2px solid white;
   padding: 10px; 
   max-width: 440px;
   margin-bottom: 10px;
@@ -34,16 +34,16 @@
 
 
 .search-text::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: #aaa;
+  color: white;
   opacity: 1; /* Firefox */
 }
 
 .search-text:-ms-input-placeholder { /* Internet Explorer 10-11 */
-  color: #aaa;
+  color: white;
 }
 
 .search-text::-ms-input-placeholder { /* Microsoft Edge */
-  color: #aaa;
+  color: white;
 }
 
 .btn-forsvik {
@@ -70,7 +70,7 @@
 .forsvik-text {
     font-family: 'Consolas','Courier New', Courier, monospace;
     color: #333333;
-    font-size: 16;
+    font-size: 14;
     padding: 5px;
 }
 .showEdit {
@@ -722,6 +722,21 @@ input[type=text]:focus {
     cursor: pointer;
   }
 
+  .download-modal{
+    position: absolute;
+    top: 33px;
+    right: 80px;
+    color: #f1f1f1;
+    font-size: 22px;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+  .download-modal:hover,
+  .download-modal:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+  }
   /* The Close Button */
   .close-modal {
     position: absolute;

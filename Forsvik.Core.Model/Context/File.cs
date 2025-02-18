@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,8 @@ namespace Forsvik.Core.Model.Context
         public Guid? FolderId { get; set; }
 
         public DateTime Created { get; set; }
+
+        public bool RetrievedCreatedFromImage { get; set; }
 
         public virtual Folder Folder { get; set; }
 

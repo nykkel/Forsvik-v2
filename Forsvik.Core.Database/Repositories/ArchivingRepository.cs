@@ -4,7 +4,6 @@ using Forsvik.Core.Model.Interfaces;
 using Forsvik.Core.Utilities.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity.Migrations;
 using System.Drawing;
 using System.IO;
 using System.IO.Compression;
@@ -12,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.EntityFrameworkCore;
 
 namespace Forsvik.Core.Database.Repositories
 {
@@ -28,41 +28,44 @@ namespace Forsvik.Core.Database.Repositories
             LogService = logService;
         }
 
-        public FolderModel GetArchive(Guid id)
+        public async Task<FolderModel> GetArchive(Guid id)
         {
-            var model = Database.Folders.Find(id);
+            var model = await Database.Folders.FindAsync(id);
             return new FolderModel().SemanticCopy(model);
         }
 
-        public FolderModel GetFolder(Guid id)
+        public async Task<FolderModel> GetFolder(Guid id)
         {
-            var model = Database.Folders.Find(id);
+            var model = await Database.Folders.FindAsync(id);
             return new FolderModel().SemanticCopy(model);
         }
 
-        public List<FolderModel> GetArchives()
+        public async Task<List<FolderModel>> GetArchives()
         {
-            return Database
+            var models =  await Database
                 .Folders
                 .Where(x => x.ParentFolderId == null)
                 .OrderBy(x => x.Index)
-                .ToList()
-                .Select(a => new FolderModel { Id = a.Id}.SemanticCopy(a))
+                .ToListAsync();
+
+            return models.Select(a => new FolderModel { Id = a.Id}.SemanticCopy(a))
                 .ToList();
         }
                 
-        public List<FolderModel> GetFolders(Guid parentFolderId)
+        public async Task<List<FolderModel>> GetFolders(Guid parentFolderId)
         {
-            return Database
+            var models = await Database
                 .Folders
                 .Where(x => x.ParentFolderId == parentFolderId)
                 .OrderBy(x => x.Index)
-                .ToList()
+                .ToListAsync();
+
+            return models
                 .Select(x => new FolderModel().SemanticCopy(x))
                 .ToList();
         }
 
-        public List<FileModel> GetFiles(Guid folderId, bool? sortAsc, SearchField searchField)
+        public async Task<List<FileModel>> GetFiles(Guid folderId, bool? sortAsc, SearchField searchField)
         {
             var asc = sortAsc ?? true;
 
@@ -70,10 +73,11 @@ namespace Forsvik.Core.Database.Repositories
                 .Files
                 .Where(x => x.FolderId == folderId);
 
-            return files
+            var models = await files
                 .OrderBy(searchField.ToString(), asc)
-                .ToList()
-                .Select(x => new FileModel().SemanticCopy(x))
+                .ToListAsync();
+            
+            return models.Select(x => new FileModel().SemanticCopy(x))
                 .ToList();
         }
 
@@ -98,14 +102,16 @@ namespace Forsvik.Core.Database.Repositories
 
         public async Task<Guid> SaveFolder(FolderModel model)
         {
-            var folder = model.Id == Guid.Empty ? new Folder
+            var isNew = model.Id == Guid.Empty;
+
+            var folder = isNew ? new Folder
             {
                 Id = Guid.NewGuid(),
                 Name = model.Name,                
                 Path = RecursePath(model.Name, model.ParentFolderId),
                 ParentFolderId = model.ParentFolderId
             } 
-            : Database.Folders.Find(model.Id);
+            : await Database.Folders.FindAsync(model.Id);
 
             var tagsChanged = folder.Tags != model.Tags;
 
@@ -115,7 +121,9 @@ namespace Forsvik.Core.Database.Repositories
             folder.Index = model.Index;
             folder.Description = model.Description;
             folder.ImageFileId = model.ImageFileId;
-            Database.Folders.AddOrUpdate(folder);
+            
+            if (isNew)
+                Database.Folders.Add(folder);
 
             ReorderFolders(folder);
 
@@ -153,7 +161,6 @@ namespace Forsvik.Core.Database.Repositories
         private void RecreateFilePaths(Folder folder, string path)
         {            
             folder.Path = $"{path}/{folder.Name}";
-            Database.Folders.AddOrUpdate(folder);
 
             foreach (Folder f in folder.Folders)
             {
@@ -178,22 +185,20 @@ namespace Forsvik.Core.Database.Repositories
                 }
 
                 folders[i].Index = inx;
-                Database.Folders.AddOrUpdate(folders[i]);
                 inx++;
             }
         }
 
-        public void SaveFileChanges(FileModel model)
+        public async Task SaveFileChanges(FileModel model)
         {
-            var file = Database.Files.Find(model.Id);
+            var file = await Database.Files.FindAsync(model.Id);
             var tagsChanged = file.Tags != model.Tags;
 
             file.Description = model.Description;
             file.Name = model.Name;
             file.Tags = model.Tags;
-
-            Database.Files.AddOrUpdate(file);
-            Database.SaveChanges();
+            
+            await Database.SaveChangesAsync();
 
             if (tagsChanged)
             {
@@ -239,7 +244,7 @@ namespace Forsvik.Core.Database.Repositories
             Database.Folders.Remove(folder);
         }
 
-        public Guid AddFolder(AddFolderModel model)
+        public async Task<Guid> AddFolder(AddFolderModel model)
         {
             var folder = new Folder
             {
@@ -250,7 +255,7 @@ namespace Forsvik.Core.Database.Repositories
             };
 
             Database.Folders.Add(folder);
-            Database.SaveChanges();
+            await Database.SaveChangesAsync();
 
             return folder.Id;
         }
@@ -276,7 +281,7 @@ namespace Forsvik.Core.Database.Repositories
             return path;
         }
 
-        public Guid AddOrUpdateFile(string fileName, byte[] data, Guid? folderId)
+        public async Task<Guid> AddOrUpdateFile(string fileName, byte[] data, Guid? folderId, DateTime? created = null)
         {
             var name = Path.GetFileNameWithoutExtension(fileName);
             var extension = Path.GetExtension(fileName).TrimStart('.');
@@ -289,8 +294,8 @@ namespace Forsvik.Core.Database.Repositories
             var fileId = Exists(fileName, folderId);
             if (fileId != null)
             {
-                file = Database.Files.Find(fileId);
-                file.Size = (int)(Convert.ToDouble(data.Length) / 1024);                
+                file = await Database.Files.FindAsync(fileId);
+                file!.Size = (int)(Convert.ToDouble(data.Length) / 1024);                
             }
             else
             {                
@@ -301,11 +306,12 @@ namespace Forsvik.Core.Database.Repositories
                     Size = (int)(Convert.ToDouble(data.Length) / 1024),
                     Extension = extension,
                     FolderId = folderId,
-                    Created = DateTime.Now
+                    Created = created ?? DateTime.Now,
+                    RetrievedCreatedFromImage = created != null
                 };
             }
             
-            FileRepository.Save(data, file.Id);
+            await FileRepository.Save(data, file.Id);
 
             if (file.Extension.Equals("jpg", StringComparison.OrdinalIgnoreCase) ||
                 file.Extension.Equals("jpeg", StringComparison.OrdinalIgnoreCase))
@@ -314,8 +320,10 @@ namespace Forsvik.Core.Database.Repositories
                 FileRepository.SaveThumbnail(thumbnail, file.Id);
             }
 
-            Database.Files.AddOrUpdate(file);
-            Database.SaveChanges();
+            if (fileId == null)
+                Database.Files.Add(file);
+
+            await Database.SaveChangesAsync();
 
             return file.Id;
         }
@@ -340,9 +348,14 @@ namespace Forsvik.Core.Database.Repositories
             return await FileRepository.Save(data);
         }
 
+        public async Task<Model.Context.File> GetFileInfo(Guid fileId)
+        {
+            return await Database.Files.FindAsync(fileId);
+        }
+
         public async Task<FileDataModel> GetThumbnail(Guid fileId)
         {
-            var file = Database.Files.Find(fileId);
+            var file = await Database.Files.FindAsync(fileId);
             if (file == null)
             {
                 return FolderThumnail();
@@ -470,17 +483,18 @@ namespace Forsvik.Core.Database.Repositories
             };
         }
 
-        public void UpdateTags(string text, Guid entityId, EntityType type)
+        public async Task UpdateTags(string text, Guid entityId, EntityType type)
         {
-            var tags = Database
+            var tags = await Database
                 .Tags
-                .Where(x => x.EntityId == entityId);
+                .Where(x => x.EntityId == entityId)
+                .ToListAsync();
 
             if (tags.Any())
             {
                 tags.Do(t => Database.Tags.Remove(t));
             }
-            Database.SaveChanges();
+            await Database.SaveChangesAsync();
 
             if (!text.HasValue()) return;
 
@@ -501,7 +515,7 @@ namespace Forsvik.Core.Database.Repositories
                 });
             });
 
-            Database.SaveChanges();
+            await Database.SaveChangesAsync();
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31313.79
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "forsvikapi", "forsvikapi\forsvikapi.csproj", "{0C4C3360-08C7-4B2F-8F0A-19FAA99D5F8B}"
 EndProject
@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Forsvik.Core.Model", "Forsv
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Forsvik.Core.Utilities", "Forsvik.Core.Utilities\Forsvik.Core.Utilities.csproj", "{51C1AFD2-2109-4CBA-B5D2-A76B7FE6BA60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSite", "TestSite\TestSite.csproj", "{DE691ECC-98C0-4972-8B57-161FA03FF309}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSite", "TestSite\TestSite.csproj", "{DE691ECC-98C0-4972-8B57-161FA03FF309}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Forsvik.Core.DocumentStore", "Forsvik.Core.DocumentStore\Forsvik.Core.DocumentStore.csproj", "{FC68D9DC-D39A-4546-B40F-0BC3AE14474F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{DE691ECC-98C0-4972-8B57-161FA03FF309}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE691ECC-98C0-4972-8B57-161FA03FF309}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE691ECC-98C0-4972-8B57-161FA03FF309}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC68D9DC-D39A-4546-B40F-0BC3AE14474F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC68D9DC-D39A-4546-B40F-0BC3AE14474F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC68D9DC-D39A-4546-B40F-0BC3AE14474F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC68D9DC-D39A-4546-B40F-0BC3AE14474F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

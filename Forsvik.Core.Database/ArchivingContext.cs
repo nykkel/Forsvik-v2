@@ -1,22 +1,14 @@
-﻿using Forsvik.Core.Model.Context;
+﻿using Forsvik.Core.DocumentStore.Contract;
+using Forsvik.Core.DocumentStore.Models;
+using Forsvik.Core.Model.Context;
 using Microsoft.Extensions.Configuration;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Forsvik.Core.Database
 {
-    public class ArchivingContext : DbContext
+    public class ArchivingContext : DbContext, IDocumentDbContext
     {
-        public ArchivingContext() : base("Server=81.95.105.77;Initial Catalog=e002497;User ID=e002497a;Password=Rumpnisse234;Connection Timeout=30;")
-        { }
-
-        //public ArchivingContext() : base("Data Source=.;Initial Catalog=ForsvikDb;Integrated Security=true;")
-        //{ }
-
-        public ArchivingContext(string connectionString) : base(connectionString)
-        {
-        }
-
-        public ArchivingContext(IConfiguration config) : base(config.GetConnectionString("ForsvikDb"))
+        public ArchivingContext(DbContextOptions<ArchivingContext> options) : base(options)
         {
         }
 
@@ -30,11 +22,11 @@ namespace Forsvik.Core.Database
 
         public DbSet<User> Users { get; set; }
 
-        public virtual DbSet<Document> Documents { get; set; }
+        public DbSet<Document> Documents { get; set; }
 
-        public virtual DbSet<DocumentIndex> DocumentsIndexes { get; set; }
+        public DbSet<DocumentIndex> DocumentIndexes { get; set; }
 
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DocumentIndex>()
                 .Property(x => x.Key)

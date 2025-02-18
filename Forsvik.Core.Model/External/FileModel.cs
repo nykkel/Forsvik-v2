@@ -12,6 +12,10 @@ namespace Forsvik.Core.Model.External
 
         public DateTime Created { get; set; }
 
+        public string CreatedDate => Created.ToShortDateString();
+
+        public bool RetrievedCreatedFromImage { get; set; }
+
         public string Name { get; set; }
 
         public string Extension { get; set; }

@@ -29,9 +29,8 @@ namespace forsvikapi.Controllers
             ILogService logService, 
             IWebHostEnvironment hostingEnvironment, 
             ArchivingRepository archivingRepository, 
-            DocumentRepository documentRepository,
             UserService userService,
-            ArchivingContext database) : base(logService, hostingEnvironment, archivingRepository, documentRepository)
+            ArchivingContext database) : base(logService, hostingEnvironment, archivingRepository)
         {
             Database = database;
             UserService = userService;
@@ -65,23 +64,31 @@ namespace forsvikapi.Controllers
 
             var text = HttpUtility.UrlDecode(query);
 
-            var items = await Task.Factory.StartNew(() => searchRepository.Find(text, category));
+            var items = await searchRepository.Find(text, category);
             return items;
         }
 
         [HttpGet]
         [Route("getarchives")]
-        public async Task<ActionResult<List<FolderModel>>> GetArchives()
+        public async Task<IActionResult> GetArchives()
         {
-            var archives = await Task.Factory.StartNew(() => Repository.GetArchives());
-            return archives;
+            try
+            {
+                var archives = await Repository.GetArchives();
+                return Ok(archives);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return Ok($"Error: {e.GetBaseException().Message}, {e.StackTrace}");
+            }
         }
 
         [HttpGet]
         [Route("getfolder/{id}")]
         public async Task<ActionResult<FolderModel>> GetFolder(Guid id)
         {
-            var folder = await Task.Factory.StartNew(() => Repository.GetFolder(id));            
+            var folder = await Repository.GetFolder(id);
             return folder;
         }
 
@@ -89,7 +96,7 @@ namespace forsvikapi.Controllers
         [Route("getfolders/{parentFolderId}")]
         public async Task<ActionResult<List<FolderModel>>> GetFolders(Guid parentFolderId)
         {
-            var folders = await Task.Factory.StartNew(() => Repository.GetFolders(parentFolderId));
+            var folders = await Repository.GetFolders(parentFolderId);
             return folders;
         }
 
@@ -97,42 +104,41 @@ namespace forsvikapi.Controllers
         [Route("getfoldernavigation/{folderId}")]
         public async Task<ActionResult<List<NavigationModel>>> GetFolderNavigation(Guid folderId)
         {
-            var items = await Task<List<NavigationModel>>.Factory.StartNew(() =>
+            var list = new List<NavigationModel>();
+            var folder = await Repository.GetFolder(folderId);
+            list.Add(new NavigationModel
             {
-                var list = new List<NavigationModel>();
-                var folder = Repository.GetFolder(folderId);
-                list.Add(new NavigationModel
+                Name = folder.Name,
+                Route = "/folder?id=" + folder.Id
+            });
+
+            while (folder.ParentFolderId != null)
+            {
+                folder = await Repository.GetFolder(folder.ParentFolderId.Value);
+                list.Insert(0, new NavigationModel
                 {
                     Name = folder.Name,
                     Route = "/folder?id=" + folder.Id
                 });
+            }
 
-                while (folder.ParentFolderId != null)
-                {
-                    folder = Repository.GetFolder(folder.ParentFolderId.Value);
-                    list.Insert(0, new NavigationModel
-                    {
-                        Name = folder.Name,
-                        Route = "/folder?id=" + folder.Id
-                    });
-                }
-
-                list.Insert(0, new NavigationModel
-                {
-                    Name = "Arkiv",
-                    Route = "/dashboard"
-                });
-                return list;
+            list.Insert(0, new NavigationModel
+            {
+                Name = "Arkiv",
+                Route = "/dashboard"
             });
 
-            return items;
+            if (list.Count > 1)
+                list.Last().IsLastFolder = true;
+
+            return list;
         }
 
         [HttpGet]
         [Route("getfiles/{folderId}")]
         public async Task<ActionResult<List<FileModel>>> GetFiles(Guid folderId, bool? sortAsc, SearchField searchField)
         {
-            var files = await Task.Factory.StartNew(() => Repository.GetFiles(folderId, sortAsc, searchField));
+            var files = await Repository.GetFiles(folderId, sortAsc, searchField);
             files.ForEach(file =>
             {
                 file.Url = $"file/resource/{file.Id}";
@@ -144,7 +150,7 @@ namespace forsvikapi.Controllers
         [Route("savefilechanges")]
         public async Task<ActionResult> SaveFileChanges(FileModel model)
         {
-            await Task.Factory.StartNew(() => Repository.SaveFileChanges(model));
+            await Repository.SaveFileChanges(model);
             return new EmptyResult();
         }
 
@@ -159,7 +165,7 @@ namespace forsvikapi.Controllers
         [Route("getarchive/{id}")]
         public async Task<ActionResult<FolderModel>> GetArchive(Guid id)
         {
-            var model = await Task.Factory.StartNew(() => Repository.GetArchive(id));
+            var model = await Repository.GetArchive(id);
             return model;
         }
 
@@ -167,7 +173,7 @@ namespace forsvikapi.Controllers
         [Route("addfolder")]
         public async Task<ActionResult<Guid>> AddFolder(AddFolderModel model)
         {
-            var id = await Task.Factory.StartNew(() => Repository.AddFolder(model));
+            var id = await Repository.AddFolder(model);
             return id;
         }
     }

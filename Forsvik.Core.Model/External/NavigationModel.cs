@@ -11,5 +11,7 @@ namespace Forsvik.Core.Model.External
         public string Name { get; set; }
 
         public string Route { get; set; }
+
+        public bool IsLastFolder { get; set; }
     }
 }

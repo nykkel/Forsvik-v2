@@ -26,7 +26,7 @@
     </div>
     <div class="row mt-4 ml-5" style="width: 500px">
       <h2 style="color: white">
-        Välkommen till Forsviks-Guidens filarkiv. Här kan du hitta alla tänkbara
+        Välkommen till Forsviks-Guidens filarkiv. Här kan du hitta
         nutida och gamla bilder och dokument.
       </h2>
     </div>

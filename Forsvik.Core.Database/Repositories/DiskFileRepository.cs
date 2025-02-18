@@ -164,6 +164,12 @@ namespace Forsvik.Core.Database.Repositories
             throw new Exception("File reference dont exist, " + file);
         }
 
+        public IEnumerable<string> ListFiles()
+        {
+            var path = GetStore();
+            return Directory.EnumerateFiles(path);
+        }
+
         public async Task<byte[]> Get(Guid id)
         {
             return await Task.Factory.StartNew(() =>
