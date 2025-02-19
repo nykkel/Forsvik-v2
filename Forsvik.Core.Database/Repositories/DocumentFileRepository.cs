@@ -1,6 +1,4 @@
-﻿using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Forsvik.Core.Model.Interfaces;
+﻿using Forsvik.Core.Model.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;

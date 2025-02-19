@@ -2,7 +2,7 @@
 
 namespace Forsvik.Core.Model.Context
 {
-    public class Document
+    public class Document_Old
     {
         public Guid Id { get; set; }
 

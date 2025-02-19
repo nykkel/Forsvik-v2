@@ -2,14 +2,20 @@ Användarnamn: forsvik-arkiv.se
 Lösenord: XJsDqLqW4q
 Kundnummer: FA90-77-40-8871
 
-FTP:
+FTP: (plain)
 forsvik-arkiv.se
 s012435a
 Rumpnisse234
 
 Databas:
 
-IP:		81.95.105.77
+IP:		81.95.105.77 (mssql100.windows.loopia.com)
 Databas:	e002497
 Användarnamn:	e002497a
 Password:	Rumpnisse234
+
+mikael nyberg
+072-4457331
+
+viktor ek
+073-5167356

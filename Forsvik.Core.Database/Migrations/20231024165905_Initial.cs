@@ -11,6 +11,7 @@ namespace Forsvik.Core.Database.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+
         }
 
         /// <inheritdoc />
